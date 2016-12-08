@@ -4,19 +4,24 @@ dist: trusty
 node_js: stable
 before_script:
 - npm install --silent bower polymer-cli
-- bower install --silent
+- ./node_modules/.bin/bower install --silent
 addons:
   sauce_connect: true
 script:
-- ./node_modules/.bin/polymer lint raml-request-panel.html
-- ./node_modules/.bin/polymer test --plugin sauce --job-name "raml-request-panel:${TRAVIS_BRANCH}" --build-number=${TRAVIS_BUILD_NUMBER}
+- "./node_modules/.bin/polymer lint raml-request-panel.html"
+- ./node_modules/.bin/polymer test --plugin sauce --job-name "raml-request-panel:${TRAVIS_BRANCH}"
+  --build-number=${TRAVIS_BUILD_NUMBER}
 cache:
   directories:
   - bower_components
   - node_modules
 branches:
   only:
-    - stage
-    - develop
+  - stage
+  - develop
 after_success:
-  - node tasks/ci.js
+- node tasks/ci.js
+env:
+  global:
+  - secure: jP7IYzQgfF69BMxLCWhwy7JARGDnkuzXRF56hABasd2PraXQUCrqAeLmWh6dv+iLKJih4u5V8AfU8gU1Fwp/Bgy4d3LmeFx8bSNC/AkKMpZqoytdzw8qyk9y3jksBOwXTfojzkrfBtLI6H85CZFFDhHvBki2WGtF3TZVS86NTFumLYVmCLUQnYQkvPpoKak4fMApd6FaKUw4w2qQ7eUQ3WsS565wkzg+4Vd9sKX3x1SGC3XdrRb46o7iXmUKKG23bs3y0aL7MVi16V+O6oiAGNqiW6jth/wTDOvrN2ZlylTJUn14F1ApTIteTUvIAoRz9/qQlrsLV3HMDZRwStw50zRwOdjQf0xFXJ7i70AuhpOzS0FX685/rjJLZsX/2LFz8PVMI7llZQp4Ajt0QI5rrOXsJsiMmJkUz6m0bfwXdU2vdPDPFBaphXRIdE9z7jb0kUCqjtOVVp4Z1x8xcKupvToflTVgahEydUOOuONb2iGaxlWWTny8RzrgqHNzSQgG5004PAZBKU/BHeODx+p36K+E37OPylFoggHQ2iF9RV8oUQukt8rx2VK624rufZWTAp6uwF2WHbKm0z6sbGKuXjHkt9kXZEEQGqeXlbNi++jsYWe/g3egWANRRX5Ola02gDdIPYMu9WXXRPeb8B5oqqfHUVp6qDlUex06hePKzGs=
+  - secure: OjMY3PRsvsYlKuMzGP1PASi86e6vUrtVTJERJkLbV1fKViZi77huvT6Jz3OkVcmJI3vxxJEAcGAwnN3TdXCRC2uy5MoMBc6BG5PkvVZUZV8z/h0QOiDtvwmj2lAG8z4k47dxiL8ACbwu0piEMrECW8JI2bFfh8Zyp8lCDeN5fqywfuyMEYJsSI0v/XgGTJDfgXEh5kFW6ezTsuy1shk2f1DhnFqDPq8F8JFJNJmMjTTlMBfwcLvKnmVJg9M1PF68OTlEZ8jeKU6/QC8bU1KOp+hs+aJo0ZWxJqT+5FcRuAvg0rlpxnDREKWroWcHtHiThEky8/M8OdIocgvBZ1zCbGqkpkpezfNLgfu+rjRdgEgd4MNIal+ZqRcLCOXaX1nCh53rRakqJxfeikX0w6dI+Ohcsci6A5OKDR1bIeDK9LNBLhZhd1/tgwMYQeYzgtlTVurMGVggU/nNmPgrLWbglQKWQ9M306KqpFG3ugltIpvGmXahvDC9e2lGKP5RS/XRrFu2a1nHrDz1SZRDAadus+5pi856s5tDKs1AiYAiNhrJs/dmRatG5OMKZBM5xn03dGBDKILZcFY+dUWcxt3hxSnRkpV7BX3hT9OaivnJDp7AE8q8FuzHC9hFdd5P9rWUnHCkelML27YWnTD9GWDat8uycB8GLe5D9/+5d6jYdSA=
