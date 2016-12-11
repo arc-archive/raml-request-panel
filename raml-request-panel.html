@@ -24,6 +24,8 @@ the License.
 <link rel="import" href="../raml-path-to-object/raml-path-to-object.html">
 <link rel="import" href="../raml-docs-response-panel/raml-docs-response-panel.html">
 <link rel="import" href="../raml-docs-method-viewer/raml-docs-method-viewer.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../raml-request-parameters-editor/raml-request-parameters-editor.html">
 
 <!--
 The request panel view for the request defined as a RAML method.
@@ -54,10 +56,30 @@ Custom property | Description | Default
     <style>
     :host {
       display: block;
+
+      --raml-headers-form: {
+        padding: 16px;
+      }
+
+      --raml-request-parameters-editor: {
+        padding: 16px;
+      }
+
+      --raml-docs-response-panel: {
+        padding: 16px;
+      }
+
+      --body-json-editor: {
+        padding: 16px;
+      }
     }
 
     .content {
       @apply(--layout-horizontal);
+    }
+
+    h2 {
+      @apply(--paper-font-subhead);
     }
 
     *[hidden] {
@@ -84,20 +106,25 @@ Custom property | Description | Default
         <raml-path-selector raml="[[raml]]" selected-path="{{path}}" resources-only></raml-path-selector>
       </div>
       <div main>
+        <div class="url-editor">
+          A place for the URL editor.
+        </div>
         <paper-tabs selected="{{selectedTab}}">
-          <paper-tab>Body</paper-tab>
+          <paper-tab>Parameters</paper-tab>
+          <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
           <paper-tab>Headers</paper-tab>
           <paper-tab>Responses</paper-tab>
           <paper-tab>Documentation</paper-tab>
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
-          <body-editor-panel content-type="[[contentType]]" value="{{payload}}"></body-editor-panel>
+          <raml-request-parameters-editor query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
+          <body-editor-panel hidden$="[[!isPayloadRequest]]" content-type="[[contentType]]" value="{{payload}}"></body-editor-panel>
           <raml-request-headers-editor raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
           <section>
             <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined.</p>
             <raml-docs-response-panel hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
           </section>
-          <raml-docs-method-viewer raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide></raml-docs-method-viewer>
+          <raml-docs-method-viewer raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide no-tryit></raml-docs-method-viewer>
         </iron-pages>
       </div>
     </div>
@@ -143,10 +170,11 @@ Custom property | Description | Default
       contentType: {
         type: String
       },
-      // Set to true if current request (method) can carry a payload (message body).
+      // Computed value if the method can carry a payload
       isPayloadRequest: {
         type: Boolean,
-        value: false
+        value: false,
+        computed: '_computeIsPayloadRequest(method.*)'
       },
       // Headers for the request.
       headers: String,
@@ -163,9 +191,27 @@ Custom property | Description | Default
         value: false
       }
     },
+
+    observers: ['_isPayloadRequestChanged(isPayloadRequest)'],
     // Computes if passed argumet is trully.
     _computeHasData: function(raml) {
       return !!raml;
+    },
+    // Computes boolean value if the selected object (method) can carry a payload
+    _computeIsPayloadRequest: function(record) {
+      var base = record.base;
+      if (!base || !base.method) {
+        return false;
+      }
+      return ['get', 'head'].indexOf(base.method) === -1;
+    },
+
+    _isPayloadRequestChanged: function() {
+      var tabs = this.$$('paper-tabs');
+      if (!tabs) {
+        return;
+      }
+      tabs.notifyResize();
     }
   });
   </script>
