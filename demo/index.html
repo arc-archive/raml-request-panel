@@ -18,16 +18,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
-  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-  <link rel="import" href="../../arc-demo-helpers/raml-demo-parser.html">
+  <link rel="import" href="../../arc-demo-helpers/raml-demo-page.html">
   <link rel="import" href="../raml-request-panel.html">
   <link rel="import" href="../../font-roboto/roboto.html">
-  <link rel="import" href="../../paper-listbox/paper-listbox.html">
-  <link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
-  <link rel="import" href="../../paper-item/paper-item.html">
-  <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
-  <style is="custom-style" include="demo-pages-shared-styles">
+  <style is="custom-style">
+  :root {
+    --paper-tabs-selection-bar-color: rgba(0, 161, 223, 1);
+  }
   html,
   body {
     margin: 0;
@@ -39,65 +36,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     font-weight: 400;
     line-height: 20px;
   }
-  header {
-    background-color: #e0e0e0;
-    margin: 0;
-    padding: 12px;
-    @apply(--layout-horizontal);
-    @apply(--layout-center);
-  }
-  h1 {
-    padding: 0;
-    margin: 0;
-    @apply(--layout-flex);
-  }
-  .main {
-    position: relative;
-    height: 100%;
-  }
+
   </style>
 </head>
 <body unresolved>
-  <header>
-    <h1>RAML request panel</h1>
-    <paper-dropdown-menu label="RAML definition">
-      <paper-listbox id="urlSelector" class="dropdown-content" selected="0">
-        <paper-item data-url="https://raw.githubusercontent.com/advanced-rest-client/raml-example-api/master/api.raml">ARC example</paper-item>
-        <paper-item data-url="https://raw.githubusercontent.com/raml-org/raml-examples/master/others/world-music-api/api.raml">World Music API</paper-item>
-        <paper-item data-url="https://raw.githubusercontent.com/raml-org/raml-examples/master/others/alainn-mobile-shopping/api.raml">Álainn Cosmetics Mobile Orders API</paper-item>
-        <paper-item data-url="https://raw.githubusercontent.com/raml-org/raml-examples/master/others/mobile-order-api/api.raml">Mobile Order API</paper-item>
-      </paper-listbox>
-    </paper-dropdown-menu>
-  </header>
-
-  <raml-demo-parser></raml-demo-parser>
-
-  <section class="main">
-    <raml-request-panel></raml-request-panel>
-  </section>
-
-
-  <!-- <raml-path-to-object raml="[[raml]]" selected-path="{{selectedPath}}" selected-object="{{selectedObject}}" is-method="{{isMethod}}"></raml-path-to-object> -->
-  <script>
-  (function() {
-    'use strict';
-    function $(selector) {
-      return document.querySelector(selector);
-    }
-    $('#urlSelector').addEventListener('iron-select', function(e) {
-      var parser = $('raml-demo-parser');
-      var url = e.detail.item.dataset.url;
-      parser.ramlFileUrl = url;
-      parser._downloadRaml();
-    });
-    $('raml-demo-parser').addEventListener('raml-ready', function(e) {
-      var panel = $('raml-request-panel');
-      panel.raml = e.detail.raml;
-    });
-    window.addEventListener('WebComponentsReady', function() {
-
-    });
-  })();
-  </script>
+  <template is="dom-bind" id="app">
+    <raml-demo-page raml="{{raml}}" no-selector narrow="{{narrow}}">
+      <h1>The raml-request-panel element</h1>
+      <div main>
+        <raml-request-panel raml="[[raml]]" narrow="[[narrow]]"></raml-request-panel>
+      </div>
+    </raml-demo-page>
+  </template>
 </body>
 </html>

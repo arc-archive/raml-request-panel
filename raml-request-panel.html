@@ -12,10 +12,10 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-styles/typography.html">
 <link rel="import" href="../raml-aware/raml-aware.html">
 <link rel="import" href="../raml-path-selector/raml-path-selector.html">
-<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../paper-tabs/paper-tabs.html">
 <link rel="import" href="../paper-tabs/paper-tab.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
@@ -24,9 +24,12 @@ the License.
 <link rel="import" href="../raml-path-to-object/raml-path-to-object.html">
 <link rel="import" href="../raml-docs-response-panel/raml-docs-response-panel.html">
 <link rel="import" href="../raml-docs-method-viewer/raml-docs-method-viewer.html">
-
+<link rel="import" href="../raml-request-parameters-editor/raml-request-parameters-editor.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
+<link rel="import" href="../raml-request-url-editor/raml-request-url-editor.html">
 <!--
-The request panel view for the request defined as a RAML method.
+The request panel view for the request defined as a RAML method. It is a main view element for the
+API console to display the request panel related to the RAML specification.
 
 This element is meant to be used with RAML specification. See demo for usage information.
 
@@ -54,22 +57,71 @@ Custom property | Description | Default
     <style>
     :host {
       display: block;
+
+      --raml-headers-form: {
+        padding: 16px;
+      }
+
+      --raml-request-parameters-editor: {
+        padding: 16px;
+      }
+
+      --raml-docs-response-panel: {
+        padding: 16px;
+      }
+
+      --body-json-editor: {
+        padding: 16px;
+      }
+
+      --raml-docs-response-panel-docs: {
+        padding: 8px;
+      }
     }
 
     .content {
       @apply(--layout-horizontal);
     }
 
+    :host([narrow]) .content {
+      @apply(--layout-vertical);
+      padding: 12px 0;
+    }
+
+    h2 {
+      @apply(--paper-font-subhead);
+    }
+
+    :host([narrow]) h2 {
+      margin: 0 12px;
+    }
+
     *[hidden] {
       display: none !important;
     }
 
-    div[drawer] {
+    .drawer {
       width: 256px;
     }
 
-    div[main] {
+    .main {
       @apply(--layout-flex);
+    }
+
+    :host([narrow]) .main {
+      padding: 16px;
+    }
+
+    .main > * {
+      display: none;
+    }
+
+    :host([is-method]) .main > * {
+      display: block;
+    }
+
+    :host([narrow]) .drawer {
+      width: 100%;
     }
 
     iron-pages> * {
@@ -78,26 +130,33 @@ Custom property | Description | Default
     }
 
     </style>
+    <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
+
     <div class="content">
-      <div drawer>
+      <div class="drawer">
         <h2>[[raml.title]]</h2>
-        <raml-path-selector raml="[[raml]]" selected-path="{{path}}" resources-only></raml-path-selector>
+        <raml-path-selector narrow="[[narrow]]" raml="[[raml]]" selected-path="{{path}}" resources-only no-resource-selection></raml-path-selector>
       </div>
-      <div main>
+      <div class="main">
+        <div class="url-editor">
+          <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-url-editor>
+        </div>
         <paper-tabs selected="{{selectedTab}}">
-          <paper-tab>Body</paper-tab>
+          <paper-tab>Parameters</paper-tab>
+          <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
           <paper-tab>Headers</paper-tab>
           <paper-tab>Responses</paper-tab>
           <paper-tab>Documentation</paper-tab>
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
-          <body-editor-panel content-type="[[contentType]]" value="{{payload}}"></body-editor-panel>
-          <raml-request-headers-editor raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
+          <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
+          <body-editor-panel narrow="[[narrow]]" hidden$="[[!isPayloadRequest]]" content-type="[[contentType]]" value="{{payload}}"></body-editor-panel>
+          <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
           <section>
             <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined.</p>
-            <raml-docs-response-panel hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
+            <raml-docs-response-panel narrow="[[narrow]]" hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
           </section>
-          <raml-docs-method-viewer raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide></raml-docs-method-viewer>
+          <raml-docs-method-viewer narrow="[[narrow]]" raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide no-tryit></raml-docs-method-viewer>
         </iron-pages>
       </div>
     </div>
@@ -143,10 +202,11 @@ Custom property | Description | Default
       contentType: {
         type: String
       },
-      // Set to true if current request (method) can carry a payload (message body).
+      // Computed value if the method can carry a payload
       isPayloadRequest: {
         type: Boolean,
-        value: false
+        value: false,
+        computed: '_computeIsPayloadRequest(method.*)'
       },
       // Headers for the request.
       headers: String,
@@ -155,17 +215,49 @@ Custom property | Description | Default
       // Selected object is method.
       isMethod: {
         type: Boolean,
-        value: false
+        value: false,
+        reflectToAttribute: true
       },
       // True when the response documentation pane has data
       responsePanelHasData: {
         type: Boolean,
         value: false
+      },
+      /**
+       * If set it will renders the view in the narrow layout.
+       */
+      narrow: {
+        type: Boolean,
+        notify: true,
+        reflectToAttribute: true
+      },
+      // A widith below which the `narrow` property will be set to true.
+      narrowWidth: {
+        type: String,
+        value: '768px'
       }
     },
+
+    observers: ['_isPayloadRequestChanged(isPayloadRequest)'],
     // Computes if passed argumet is trully.
     _computeHasData: function(raml) {
       return !!raml;
+    },
+    // Computes boolean value if the selected object (method) can carry a payload
+    _computeIsPayloadRequest: function(record) {
+      var base = record.base;
+      if (!base || !base.method) {
+        return false;
+      }
+      return ['get', 'head'].indexOf(base.method) === -1;
+    },
+
+    _isPayloadRequestChanged: function() {
+      var tabs = this.$$('paper-tabs');
+      if (!tabs) {
+        return;
+      }
+      tabs.notifyResize();
     }
   });
   </script>
