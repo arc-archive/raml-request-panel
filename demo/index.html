@@ -41,10 +41,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 <body unresolved>
   <template is="dom-bind" id="app">
-    <raml-demo-page raml="{{raml}}" no-selector>
+    <raml-demo-page raml="{{raml}}" no-selector narrow="{{narrow}}">
       <h1>The raml-request-panel element</h1>
       <div main>
-        <raml-request-panel raml="[[raml]]"></raml-request-panel>
+        <raml-request-panel raml="[[raml]]" narrow="[[narrow]]"></raml-request-panel>
       </div>
     </raml-demo-page>
   </template>

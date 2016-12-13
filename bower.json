@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
-    "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^1.0.10",
     "raml-aware": "advanced-rest-client/raml-aware#^1.0.2",
     "raml-path-selector": "advanced-rest-client/raml-path-selector#^1.0.3",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.3.1",
@@ -30,7 +29,9 @@
     "raml-docs-response-panel": "advanced-rest-client/raml-docs-response-panel#^1.0.2",
     "raml-docs-method-viewer": "advanced-rest-client/raml-docs-method-viewer#^0.1.4",
     "paper-styles": "PolymerElements/paper-styles#^1.1.5",
-    "raml-request-parameters-editor": "advanced-rest-client/raml-request-parameters-editor#^0.1.1"
+    "raml-request-parameters-editor": "advanced-rest-client/raml-request-parameters-editor#^0.1.1",
+    "iron-media-query": "PolymerElements/iron-media-query#^1.0.8",
+    "raml-request-url-editor": "advanced-rest-client/raml-request-url-editor#^0.1.1"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#1.0.0",
