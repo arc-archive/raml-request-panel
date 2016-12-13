@@ -27,6 +27,10 @@ the License.
 <link rel="import" href="../raml-request-parameters-editor/raml-request-parameters-editor.html">
 <link rel="import" href="../iron-media-query/iron-media-query.html">
 <link rel="import" href="../raml-request-url-editor/raml-request-url-editor.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
+
 <!--
 The request panel view for the request defined as a RAML method. It is a main view element for the
 API console to display the request panel related to the RAML specification.
@@ -90,9 +94,6 @@ Custom property | Description | Default
 
     h2 {
       @apply(--paper-font-subhead);
-    }
-
-    :host([narrow]) h2 {
       margin: 0 12px;
     }
 
@@ -112,11 +113,11 @@ Custom property | Description | Default
       padding: 16px;
     }
 
-    .main > * {
+    .main {
       display: none;
     }
 
-    :host([is-method]) .main > * {
+    :host([is-method]) .main {
       display: block;
     }
 
@@ -127,6 +128,28 @@ Custom property | Description | Default
     iron-pages> * {
       border: 1px var(--raml-request-panel-panel-border-color, rgba(0, 0, 0, 0.24)) solid;
       min-height: 96px;
+    }
+
+    .action-bar {
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+      @apply(--layout-center);
+      margin-top: 8px;
+    }
+
+    .action-button {
+      background-color: var(--primary-color);
+      color: var(--primary-action-color, #fff);
+      @apply(--action-button);
+    }
+
+    raml-request-url-editor {
+      /* window width - drawer width - paddings */
+      width: calc(100vw - 256px - 32px);
+    }
+
+    :host([narrow]) raml-request-url-editor {
+      width: auto;
     }
 
     </style>
@@ -153,22 +176,41 @@ Custom property | Description | Default
           <body-editor-panel narrow="[[narrow]]" hidden$="[[!isPayloadRequest]]" content-type="[[contentType]]" value="{{payload}}"></body-editor-panel>
           <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
           <section>
-            <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined.</p>
+            <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined in the RAML definition.</p>
             <raml-docs-response-panel narrow="[[narrow]]" hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
           </section>
           <raml-docs-method-viewer narrow="[[narrow]]" raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide no-tryit></raml-docs-method-viewer>
         </iron-pages>
+        <div class="action-bar">
+          <paper-progress indeterminate hidden$="[[!loadingRequest]]"></paper-progress>
+          <paper-button class="action-button" on-tap="execute">Run</paper-button>
+        </div>
       </div>
     </div>
     <raml-path-to-object raml="[[raml]]" selected-parent="{{parentEndpoint}}" selected-path="[[path]]" selected-object="{{method}}" is-method="{{isMethod}}"></raml-path-to-object>
     <template is="dom-if" if="[[aware]]" restamp="true">
       <raml-aware raml="{{raml}}" scope="[[aware]]"></raml-aware>
     </template>
+    <iron-ajax id="request"
+      url="[[url]]"
+      headers="[[headers]]"
+      on-response="_internalResponseHandler"
+      on-error="_internalResponseErrorHandler"></iron-ajax>
   </template>
   <script>
   Polymer({
     is: 'raml-request-panel',
     properties: {
+      /**
+       * A reference to the XMLHttpRequest instance used to generate the
+       * network request.
+       *
+       * @type {XMLHttpRequest}
+       */
+      xhr: {
+        type: Object,
+        readOnly: true
+      },
       /**
        * The base RAML object. It is required to compute the API tree structure.
        * It can be replaced by the `aware` attribute if the `raml-aware` is in use.
@@ -235,6 +277,42 @@ Custom property | Description | Default
       narrowWidth: {
         type: String,
         value: '768px'
+      },
+      // If true then the request is currently loaded.
+      loadingRequest: {
+        type: Boolean,
+        notify: true,
+        readOnly: true,
+        value: false
+      },
+      // If true then the request was made using the XHR object (it has less data in the response).
+      responseIsXhr: {
+        type: Boolean,
+        notify: true,
+        readOnly: true
+      },
+      // The response object from the transport.
+      response: {
+        type: Object,
+        notify: true,
+        readOnly: true
+      },
+      // Set when the response errored.
+      responseError: {
+        type: Object,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * If internal request object is used to make a request then it will use this setting
+       * to set the XHR's `withCredentials` property.
+       * If set to true it will send user cookies with the request. However if the `OPTIONS`
+       * response's `Access-Control-Allow-Origin` header come back with the wildcard `*` then
+       * it's an error and the request won't be performed.
+       */
+      withCredentials: {
+        type: Boolean,
+        value: false
       }
     },
 
@@ -258,6 +336,177 @@ Custom property | Description | Default
         return;
       }
       tabs.notifyResize();
+    },
+    /**
+     * Execute the request with current settings.
+     * This method fires the `api-console-request` so the request can be handled by the
+     * hosting app.
+     * Hosting app must call `event.preventDefault()` on the event otherwise the console
+     * will attempt to make a request usnig XHR object.
+     */
+    execute: function() {
+      var data = this.serializeRequest();
+      var event = new CustomEvent('api-console-request', {
+        cancelable: true,
+        bubbles: true,
+        composed: true,
+        detail: data
+      });
+
+      if (!event.defaultPrevented) {
+        this._executeRequest(data);
+      } else {
+        this._setLoadingRequest(true);
+      }
+    },
+    /**
+     * Returns an object with the request properties.
+     * The object contains:
+     * - method (String)
+     * - url (String)
+     * - headers (String)
+     * - payload (String)
+     */
+    serializeRequest: function() {
+      var result = {
+        method: this.method.method.toUpperCase(),
+        url: this.url,
+        headers: this.headers,
+        payload: this.payload
+      };
+
+      return result;
+    },
+
+    _executeRequest: function(data) {
+      var xhr = this.xhr;
+      if (xhr) {
+        // There is ongoing request
+        // TODO: Set toas with the information.
+        return null;
+      }
+      this._clearRequestData();
+      xhr = new XMLHttpRequest();
+      this._setXhr(xhr);
+
+      this._setLoadingRequest(true);
+
+      // xhr.addEventListener('progress', function(progress) {
+      //   this._setProgress({
+      //     lengthComputable: progress.lengthComputable,
+      //     loaded: progress.loaded,
+      //     total: progress.total
+      //   });
+      // }.bind(this));
+
+      xhr.addEventListener('error', function() {
+        console.log(xhr.resposne);
+        console.log(xhr.status);
+        this._internalResponseErrorHandler('error');
+      }.bind(this));
+
+      xhr.addEventListener('timeout', function() {
+        this._internalResponseErrorHandler('timeout');
+      }.bind(this));
+      xhr.addEventListener('abort', function() {
+        this._internalResponseErrorHandler('abort');
+      }.bind(this));
+
+      // Called after all of the above.
+      xhr.addEventListener('loadend', function(e) {
+        this._internalResponseHandler({
+          data: e.target.response,
+          status: e.target.status,
+          statusText: e.target.statusText,
+          headers: e.target.getAllResponseHeaders()
+        });
+      }.bind(this));
+
+      try {
+        xhr.open(data.method, data.url, true);
+      } catch (e) {
+        this._internalResponseErrorHandler('run-error');
+        return;
+      }
+
+      if (data.headers) {
+        var headers = data.headers.split('\n').map(function(line) {
+          var _parts = line.split(':');
+          var _name = _parts[0];
+          var _value = _parts[1];
+          _name = _name ? _name.trim() : null;
+          _value = _value ? _value.trim() : null;
+          if (!_name || !_value) {
+            return null;
+          }
+          return {
+            name: _name,
+            value: _value
+          };
+        }).filter(function(item) {
+          return !!item;
+        });
+
+        headers.forEach(function(item) {
+          // Iven if error occur the loop will continue.
+          xhr.setRequestHeader(item.name, item.value);
+        });
+      }
+
+      xhr.timeout = 60000;
+      xhr.withCredentials = this.withCredentials;
+
+      if (['GET', 'HEAD'].indexOf(data.method) !== -1) {
+        data.payload = undefined;
+      }
+
+      try {
+        xhr.send(data.payload);
+      } catch (e) {
+        this._internalResponseErrorHandler('run-error');
+      }
+
+    },
+    /**
+     * A handler for the response from the `<iron-ajax>` element.
+     * This can occur only when the request wasn't handled by the hosting app and internal
+     * request has been made.
+     */
+    _internalResponseHandler: function(response) {
+      this._setLoadingRequest(false);
+      this._setXhr(undefined);
+      this._setResponseIsXhr(true);
+      if (this.responseError || !response.status) {
+        return;
+      }
+      this._setResponse(response);
+    },
+
+    _internalResponseErrorHandler: function(errorCode) {
+      this._setXhr(undefined);
+      this._setLoadingRequest(false);
+      var message = '';
+      switch (errorCode) {
+        case 'error':
+          message += 'Request couldn\'t be completed';
+          break;
+        case 'run-error':
+          message += 'Request was not started due the error.';
+          break;
+        case 'timeout':
+          message += 'Request timeout.';
+          break;
+        case 'abort':
+          message += 'Request aborted.';
+          break;
+      }
+      this._setResponseError(new Error(message));
+    },
+
+    _clearRequestData: function() {
+      this._setResponseIsXhr(false);
+      this._setResponse(undefined);
+      this._setResponseError(undefined);
     }
   });
   </script>
