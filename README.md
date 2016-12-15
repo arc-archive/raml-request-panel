@@ -2,7 +2,8 @@
 
 # raml-request-panel
 
-The request panel view for the request defined as a RAML method.
+The request panel view for the request defined as a RAML method. It is a main view element for the
+API console to display the request panel related to the RAML specification.
 
 This element is meant to be used with RAML specification. See demo for usage information.
 
