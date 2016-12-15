@@ -1,3 +1,13 @@
+<a name="0.0.6"></a>
+## [0.0.6](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.5...v0.0.6) (2016-12-15)
+
+
+### Update
+
+* replaced body panel with RAML body panel ([c61b6ba92fb2ca56a979ab45af76795535a41bbc](https://github.com/advanced-rest-client/raml-request-panel/commit/c61b6ba92fb2ca56a979ab45af76795535a41bbc))
+
+
+
 <a name="0.0.5"></a>
 ## [0.0.5](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.2...v0.0.5) (2016-12-15)
 
