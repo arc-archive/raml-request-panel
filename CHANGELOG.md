@@ -1,3 +1,9 @@
+<a name="0.0.7"></a>
+## [0.0.7](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.6...v0.0.7) (2016-12-15)
+
+
+
+
 <a name="0.0.6"></a>
 ## [0.0.6](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.5...v0.0.6) (2016-12-15)
 
