@@ -237,11 +237,13 @@ Custom property | Description | Default
       // Selected request tab.
       selectedTab: {
         type: Number,
-        value: 0
+        value: 0,
+        notify: true
       },
       // Current content type.
       contentType: {
-        type: String
+        type: String,
+        notify: true
       },
       // Computed value if the method can carry a payload
       isPayloadRequest: {
@@ -257,7 +259,8 @@ Custom property | Description | Default
       isMethod: {
         type: Boolean,
         value: false,
-        reflectToAttribute: true
+        reflectToAttribute: true,
+        notify: true
       },
       // True when the response documentation pane has data
       responsePanelHasData: {
