@@ -19,7 +19,7 @@ the License.
 <link rel="import" href="../paper-tabs/paper-tabs.html">
 <link rel="import" href="../paper-tabs/paper-tab.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
-<link rel="import" href="../body-editor-panel/body-editor-panel.html">
+<link rel="import" href="../raml-body-editor-panel/raml-body-editor-panel.html">
 <link rel="import" href="../raml-request-headers-editor/raml-request-headers-editor.html">
 <link rel="import" href="../raml-path-to-object/raml-path-to-object.html">
 <link rel="import" href="../raml-docs-response-panel/raml-docs-response-panel.html">
@@ -30,7 +30,6 @@ the License.
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-progress/paper-progress.html">
-
 <!--
 The request panel view for the request defined as a RAML method. It is a main view element for the
 API console to display the request panel related to the RAML specification.
@@ -173,7 +172,7 @@ Custom property | Description | Default
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
           <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
-          <body-editor-panel narrow="[[narrow]]" hidden$="[[!isPayloadRequest]]" content-type="[[contentType]]" value="{{payload}}"></body-editor-panel>
+          <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
           <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
           <section>
             <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined in the RAML definition.</p>
