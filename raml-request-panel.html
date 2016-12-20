@@ -60,6 +60,7 @@ Custom property | Description | Default
     <style>
     :host {
       display: block;
+      @apply(--raml-request-panel);
 
       --raml-headers-form: {
         padding: 16px;
@@ -69,8 +70,8 @@ Custom property | Description | Default
         padding: 16px;
       }
 
-      --raml-docs-response-panel: {
-        padding: 16px;
+      --raml-docs-response-panel-docs-content: {
+        padding: 8px;
       }
 
       --body-json-editor: {
@@ -83,7 +84,9 @@ Custom property | Description | Default
     }
 
     .content {
+      height: 100%;
       @apply(--layout-horizontal);
+      @apply(--raml-request-panel-container);
     }
 
     :host([narrow]) .content {
@@ -93,7 +96,8 @@ Custom property | Description | Default
 
     h2 {
       @apply(--paper-font-subhead);
-      margin: 0 12px;
+      margin: 8px 12px;
+      font-weight: var(--raml-request-panel-navigation-title-font-weight, 500);
     }
 
     *[hidden] {
@@ -101,11 +105,14 @@ Custom property | Description | Default
     }
 
     .drawer {
-      width: 256px;
+      width: var(--raml-request-panel-navigation-width, 256px);
+      min-width: var(--raml-request-panel-navigation-width, 256px);
+      @apply(--raml-request-panel-navigation);
     }
 
     .main {
       @apply(--layout-flex);
+      @apply(--raml-request-panel-content);
     }
 
     :host([narrow]) .main {
@@ -125,7 +132,7 @@ Custom property | Description | Default
     }
 
     iron-pages> * {
-      border: 1px var(--raml-request-panel-panel-border-color, rgba(0, 0, 0, 0.24)) solid;
+      border: 1px var(--raml-request-panel-panel-border-color, transparent) solid;
       min-height: 96px;
     }
 
@@ -144,7 +151,7 @@ Custom property | Description | Default
 
     raml-request-url-editor {
       /* window width - drawer width - paddings */
-      width: calc(100vw - 256px - 32px);
+      width: calc(100vw - 256px - 16px);
     }
 
     :host([narrow]) raml-request-url-editor {
@@ -156,6 +163,7 @@ Custom property | Description | Default
 
     <div class="content">
       <div class="drawer">
+        <content select="[nav]"></content>
         <h2>[[raml.title]]</h2>
         <raml-path-selector narrow="[[narrow]]" raml="[[raml]]" selected-path="{{path}}" resources-only no-resource-selection></raml-path-selector>
       </div>
