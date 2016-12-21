@@ -1,3 +1,13 @@
+<a name="0.0.9"></a>
+## [0.0.9](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.8...v0.0.9) (2016-12-21)
+
+
+### Update
+
+* updated styles definition ([5389da4bb8b95c43277beb7a2ccabf6aeffcd019](https://github.com/advanced-rest-client/raml-request-panel/commit/5389da4bb8b95c43277beb7a2ccabf6aeffcd019))
+
+
+
 <a name="0.0.8"></a>
 ## [0.0.8](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.7...v0.0.8) (2016-12-20)
 
