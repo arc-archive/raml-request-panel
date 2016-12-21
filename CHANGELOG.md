@@ -1,3 +1,8 @@
+<a name="0.0.8"></a>
+## [0.0.8](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.7...v0.0.8) (2016-12-20)
+
+
+
 <a name="0.0.7"></a>
 ## [0.0.7](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.5...v0.0.7) (2016-12-21)
 
@@ -32,7 +37,6 @@
 
 * replaced body panel with RAML body panel ([c61b6ba92fb2ca56a979ab45af76795535a41bbc](https://github.com/advanced-rest-client/raml-request-panel/commit/c61b6ba92fb2ca56a979ab45af76795535a41bbc))
 
->>>>>>> stage
 
 
 <a name="0.0.4"></a>
