@@ -1,3 +1,17 @@
+<a name="0.0.11"></a>
+## [0.0.11](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.8...v0.0.11) (2016-12-22)
+
+
+### Breaking
+
+* Updated element to work without any RAML data processing. It now expects a method to be passed as a property to this element. ([7b985ae75f742afcfeb4c8bc68aa2eff33dcc1ca](https://github.com/advanced-rest-client/raml-request-panel/commit/7b985ae75f742afcfeb4c8bc68aa2eff33dcc1ca))
+
+### Update
+
+* updated styles definition ([5389da4bb8b95c43277beb7a2ccabf6aeffcd019](https://github.com/advanced-rest-client/raml-request-panel/commit/5389da4bb8b95c43277beb7a2ccabf6aeffcd019))
+
+
+
 <a name="0.0.10"></a>
 ## [0.0.10](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.8...v0.0.10) (2016-12-22)
 
