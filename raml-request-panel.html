@@ -14,14 +14,11 @@ the License.
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../paper-styles/typography.html">
-<link rel="import" href="../raml-aware/raml-aware.html">
-<link rel="import" href="../raml-path-selector/raml-path-selector.html">
 <link rel="import" href="../paper-tabs/paper-tabs.html">
 <link rel="import" href="../paper-tabs/paper-tab.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../raml-body-editor-panel/raml-body-editor-panel.html">
 <link rel="import" href="../raml-request-headers-editor/raml-request-headers-editor.html">
-<link rel="import" href="../raml-path-to-object/raml-path-to-object.html">
 <link rel="import" href="../raml-docs-response-panel/raml-docs-response-panel.html">
 <link rel="import" href="../raml-docs-method-viewer/raml-docs-method-viewer.html">
 <link rel="import" href="../raml-request-parameters-editor/raml-request-parameters-editor.html">
@@ -30,6 +27,7 @@ the License.
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-progress/paper-progress.html">
+
 <!--
 The request panel view for the request defined as a RAML method. It is a main view element for the
 API console to display the request panel related to the RAML specification.
@@ -81,17 +79,18 @@ Custom property | Description | Default
       --raml-docs-response-panel-docs: {
         padding: 8px;
       }
+
+      --raml-path-selector: {
+        overflow: visible;
+        height: auto;
+        background-color: transparent;
+      }
     }
 
     .content {
       height: 100%;
       @apply(--layout-horizontal);
       @apply(--raml-request-panel-container);
-    }
-
-    :host([narrow]) .content {
-      @apply(--layout-vertical);
-      padding: 12px 0;
     }
 
     h2 {
@@ -104,31 +103,9 @@ Custom property | Description | Default
       display: none !important;
     }
 
-    .drawer {
-      width: var(--raml-request-panel-navigation-width, 256px);
-      min-width: var(--raml-request-panel-navigation-width, 256px);
-      @apply(--raml-request-panel-navigation);
-    }
-
     .main {
       @apply(--layout-flex);
       @apply(--raml-request-panel-content);
-    }
-
-    :host([narrow]) .main {
-      padding: 16px;
-    }
-
-    .main {
-      display: none;
-    }
-
-    :host([is-method]) .main {
-      display: block;
-    }
-
-    :host([narrow]) .drawer {
-      width: 100%;
     }
 
     iron-pages> * {
@@ -149,9 +126,26 @@ Custom property | Description | Default
       @apply(--action-button);
     }
 
+    .url-editor {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
     raml-request-url-editor {
       /* window width - drawer width - paddings */
-      width: calc(100vw - 256px - 16px);
+      /*width: calc(100vw - var(--raml-request-panel-navigation-width, 256px) - 16px);*/
+      @apply(--layout-flex);
+      overflow: auto;
+      padding: 0 12px;
+    }
+
+    :host([narrow]) .content {
+      @apply(--layout-vertical);
+    }
+
+    :host([narrow]) .main {
+      padding: 0 16px;
+      @apply(--raml-request-panel-content-narrow);
     }
 
     :host([narrow]) raml-request-url-editor {
@@ -162,11 +156,6 @@ Custom property | Description | Default
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
 
     <div class="content">
-      <div class="drawer">
-        <content select="[nav]"></content>
-        <h2>[[raml.title]]</h2>
-        <raml-path-selector narrow="[[narrow]]" raml="[[raml]]" selected-path="{{path}}" resources-only no-resource-selection></raml-path-selector>
-      </div>
       <div class="main">
         <div class="url-editor">
           <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-url-editor>
@@ -194,10 +183,6 @@ Custom property | Description | Default
         </div>
       </div>
     </div>
-    <raml-path-to-object raml="[[raml]]" selected-parent="{{parentEndpoint}}" selected-path="[[path]]" selected-object="{{method}}" is-method="{{isMethod}}"></raml-path-to-object>
-    <template is="dom-if" if="[[aware]]" restamp="true">
-      <raml-aware raml="{{raml}}" scope="[[aware]]"></raml-aware>
-    </template>
     <iron-ajax id="request"
       url="[[url]]"
       headers="[[headers]]"
@@ -219,24 +204,12 @@ Custom property | Description | Default
         readOnly: true
       },
       /**
-       * The base RAML object. It is required to compute the API tree structure.
-       * It can be replaced by the `aware` attribute if the `raml-aware` is in use.
+       * A RAML node representing a method node in RAML definition.
+       * It should be obtained from the `raml-path-to-object` element.
        */
-      raml: Object,
-      // A `scope` attribute for the `raml-aware` element. It will set the `raml` attribute.
-      aware: String,
-      // A RAML node representing a method node in RAML definition.
-      method: {
-        type: Object
-      },
+      method: Object,
       // Parent endpoint for selected method.
       parentEndpoint: Object,
-      // True when has RAML data in the `method` attribute.
-      hasData: {
-        type: Boolean,
-        value: false,
-        computed: '_computeHasData(raml)'
-      },
       // Selected path.
       path: {
         type: String,
@@ -263,13 +236,7 @@ Custom property | Description | Default
       headers: String,
       // Body for the request
       payload: String,
-      // Selected object is method.
-      isMethod: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-        notify: true
-      },
+
       // True when the response documentation pane has data
       responsePanelHasData: {
         type: Boolean,
@@ -326,7 +293,9 @@ Custom property | Description | Default
       }
     },
 
-    observers: ['_isPayloadRequestChanged(isPayloadRequest)'],
+    observers: [
+      '_isPayloadRequestChanged(isPayloadRequest)'
+    ],
     // Computes if passed argumet is trully.
     _computeHasData: function(raml) {
       return !!raml;
