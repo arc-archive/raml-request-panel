@@ -35,7 +35,9 @@
     "paper-button": "PolymerElements/paper-button#^1.0.14",
     "paper-progress": "PolymerElements/paper-progress#^1.0.11",
     "raml-body-editor-panel": "advanced-rest-client/raml-body-editor-panel#^0.1.1",
-    "app-layout": "PolymerElements/app-layout#^0.10.6"
+    "app-layout": "PolymerElements/app-layout#^0.10.6",
+    "authorization-panel": "advanced-rest-client/authorization-panel#^0.1.1",
+    "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.2"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#1.0.0",
@@ -58,5 +60,5 @@
     "test",
     "tasks"
   ],
-  "version": "0.0.11"
+  "version": "0.0.12"
 }

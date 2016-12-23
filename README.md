@@ -21,4 +21,9 @@ Custom property | Description | Default
 ----------------|-------------|----------
 `--raml-request-panel` | Mixin applied to the element | `{}`
 `--raml-request-panel-panel-border-color` | Border color of each block in the tabs | `rgba(0, 0, 0, 0.24)`
+`--raml-request-panel-container` | Mixin applied to the main content container | `{}`
+`--raml-request-panel-container-narrow` | Mixin applied to the main content container when layout is narrow | `{}`
+`--action-button` | Mixin applied ot the action button | `{}`
+`--primary-color` | background-color of the main action button | `--primary-color`
+`--primary-action-color` | Color of the main action button | `--primary-action-color`
 
