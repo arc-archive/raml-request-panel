@@ -27,7 +27,8 @@ the License.
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-progress/paper-progress.html">
-
+<link rel="import" href="../authorization-panel/authorization-panel.html">
+<link rel="import" href="../oauth-authorization/oauth2-authorization.html">
 <!--
 The request panel view for the request defined as a RAML method. It is a main view element for the
 API console to display the request panel related to the RAML specification.
@@ -48,6 +49,11 @@ Custom property | Description | Default
 ----------------|-------------|----------
 `--raml-request-panel` | Mixin applied to the element | `{}`
 `--raml-request-panel-panel-border-color` | Border color of each block in the tabs | `rgba(0, 0, 0, 0.24)`
+`--raml-request-panel-container` | Mixin applied to the main content container | `{}`
+`--raml-request-panel-container-narrow` | Mixin applied to the main content container when layout is narrow | `{}`
+`--action-button` | Mixin applied ot the action button | `{}`
+`--primary-color` | background-color of the main action button | `--primary-color`
+`--primary-action-color` | Color of the main action button | `--primary-action-color`
 
 @group RAML Elements
 @element raml-request-panel
@@ -59,37 +65,11 @@ Custom property | Description | Default
     :host {
       display: block;
       @apply(--raml-request-panel);
-
-      --raml-headers-form: {
-        padding: 16px;
-      }
-
-      --raml-request-parameters-editor: {
-        padding: 16px;
-      }
-
-      --raml-docs-response-panel-docs-content: {
-        padding: 8px;
-      }
-
-      --body-json-editor: {
-        padding: 16px;
-      }
-
-      --raml-docs-response-panel-docs: {
-        padding: 8px;
-      }
-
-      --raml-path-selector: {
-        overflow: visible;
-        height: auto;
-        background-color: transparent;
-      }
     }
 
     .content {
       height: 100%;
-      @apply(--layout-horizontal);
+      @apply(--layout-vertical);
       @apply(--raml-request-panel-container);
     }
 
@@ -103,14 +83,9 @@ Custom property | Description | Default
       display: none !important;
     }
 
-    .main {
-      @apply(--layout-flex);
-      @apply(--raml-request-panel-content);
-    }
-
     iron-pages> * {
       border: 1px var(--raml-request-panel-panel-border-color, transparent) solid;
-      min-height: 96px;
+      min-height: 120px;
     }
 
     .action-bar {
@@ -136,16 +111,11 @@ Custom property | Description | Default
       /*width: calc(100vw - var(--raml-request-panel-navigation-width, 256px) - 16px);*/
       @apply(--layout-flex);
       overflow: auto;
-      padding: 0 12px;
     }
 
     :host([narrow]) .content {
       @apply(--layout-vertical);
-    }
-
-    :host([narrow]) .main {
-      padding: 0 16px;
-      @apply(--raml-request-panel-content-narrow);
+      @apply(--raml-request-panel-container-narrow);
     }
 
     :host([narrow]) raml-request-url-editor {
@@ -154,33 +124,32 @@ Custom property | Description | Default
 
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
-
     <div class="content">
-      <div class="main">
-        <div class="url-editor">
-          <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-url-editor>
-        </div>
-        <paper-tabs selected="{{selectedTab}}">
-          <paper-tab>Parameters</paper-tab>
-          <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
-          <paper-tab>Headers</paper-tab>
-          <paper-tab>Responses</paper-tab>
-          <paper-tab>Documentation</paper-tab>
-        </paper-tabs>
-        <iron-pages selected="{{selectedTab}}">
-          <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
-          <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
-          <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
-          <section>
-            <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined in the RAML definition.</p>
-            <raml-docs-response-panel narrow="[[narrow]]" hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
-          </section>
-          <raml-docs-method-viewer narrow="[[narrow]]" raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide no-tryit></raml-docs-method-viewer>
-        </iron-pages>
-        <div class="action-bar">
-          <paper-progress indeterminate hidden$="[[!loadingRequest]]"></paper-progress>
-          <paper-button class="action-button" on-tap="execute">Run</paper-button>
-        </div>
+      <div class="url-editor">
+        <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-url-editor>
+      </div>
+      <paper-tabs selected="{{selectedTab}}">
+        <paper-tab>Parameters</paper-tab>
+        <paper-tab>Headers</paper-tab>
+        <paper-tab>Authorization</paper-tab>
+        <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
+        <!-- <paper-tab>Responses</paper-tab>
+        <paper-tab>Documentation</paper-tab> -->
+      </paper-tabs>
+      <iron-pages selected="{{selectedTab}}">
+        <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
+        <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
+        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" settings="[[authSettings]]"></authorization-panel>
+        <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
+        <!-- <section>
+          <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined in the RAML definition.</p>
+          <raml-docs-response-panel narrow="[[narrow]]" hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
+        </section>
+        <raml-docs-method-viewer narrow="[[narrow]]" raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide no-tryit></raml-docs-method-viewer> -->
+      </iron-pages>
+      <div class="action-bar">
+        <paper-progress indeterminate hidden$="[[!loadingRequest]]"></paper-progress>
+        <paper-button class="action-button" on-tap="execute">Run</paper-button>
       </div>
     </div>
     <iron-ajax id="request"
@@ -188,6 +157,7 @@ Custom property | Description | Default
       headers="[[headers]]"
       on-response="_internalResponseHandler"
       on-error="_internalResponseErrorHandler"></iron-ajax>
+    <oauth2-authorization></oauth2-authorization>
   </template>
   <script>
   Polymer({
@@ -290,12 +260,42 @@ Custom property | Description | Default
       withCredentials: {
         type: Boolean,
         value: false
-      }
+      },
+      /**
+       * Current authorization settings from the `authorization-panel`
+       * element.
+       */
+      authSettings: {
+        type: Object
+      },
+      // The RAML definition JSON object
+      raml: {
+        type: Object
+      },
+      // Computed value if current method is secured
+      authRequired: {
+        type: Boolean,
+        value: false,
+        computed: '_computeAuthRequired(raml.securedBy)'
+      },
+      // OAuth2 redirect URL
+      redirectUrl: String,
+      // Selected by the user auth method (id any)
+      authorizationMethod: String,
+      // Current authorization settings.
+      authorizationSettings: Object
     },
 
     observers: [
       '_isPayloadRequestChanged(isPayloadRequest)'
     ],
+
+    listeners: {
+      'authorization-enabled': '_authMethodEnabled',
+      'authorization-disabled': '_authMethodDisabled',
+      'auth-settings-changed': '_authSettingsChanged'
+    },
+
     // Computes if passed argumet is trully.
     _computeHasData: function(raml) {
       return !!raml;
@@ -315,6 +315,16 @@ Custom property | Description | Default
         return;
       }
       tabs.notifyResize();
+      if (tabs.selected === 3) {
+        tabs.selected = 0;
+      }
+    },
+    // Computes if the method has `securedBy` defined.
+    _computeAuthRequired: function(securedBy) {
+      if (!securedBy || !securedBy.length) {
+        return false;
+      }
+      return true;
     },
     /**
      * Execute the request with current settings.
@@ -324,16 +334,15 @@ Custom property | Description | Default
      * will attempt to make a request usnig XHR object.
      */
     execute: function() {
-      var data = this.serializeRequest();
       var event = new CustomEvent('api-console-request', {
         cancelable: true,
         bubbles: true,
         composed: true,
-        detail: data
+        detail: this.serializeRequest()
       });
 
       if (!event.defaultPrevented) {
-        this._executeRequest(data);
+        this._executeRequest(event.detail);
       } else {
         this._setLoadingRequest(true);
       }
@@ -353,7 +362,35 @@ Custom property | Description | Default
         headers: this.headers,
         payload: this.payload
       };
-
+      if (this.authRequired) {
+        if (this.authorizationMethod && this.authorizationSettings) {
+          var authHeader;
+          var settings = this.authorizationSettings;
+          switch (this.authorizationMethod) {
+            case 'basic': authHeader = 'Basic ' + settings.hash; break;
+            case 'oauth2': authHeader = 'Bearer ' + settings.tokenValue; break;
+            case 'ntlm':
+              // This must be set dicectly on a transport implementation
+              result.auth = {
+                settings: this.authorizationMethod,
+                type: this.authorizationMethod
+              };
+              break;
+          }
+          if (authHeader) {
+            if (/^authorization\s?:\s?.+$/im.test(result.headers)) {
+              result.headers = result.headers.
+              replace(/^(authorization)\s?:\s?.+$/im, '$1: ' + authHeader);
+            } else {
+              if (result.headers) {
+                result.headers += '\nAuthorization: ' + authHeader;
+              } else {
+                result.headers = 'Authorization: ' + authHeader;
+              }
+            }
+          }
+        }
+      }
       return result;
     },
 
@@ -486,6 +523,52 @@ Custom property | Description | Default
       this._setResponseIsXhr(false);
       this._setResponse(undefined);
       this._setResponseError(undefined);
+    },
+
+    _authMethodEnabled: function(e) {
+      this.authorizationMethod = e.detail.type;
+      this.authorizationSettings = e.detail.settings;
+    },
+
+    _authMethodDisabled: function(e) {
+      if (this.authorizationMethod === e.detail.type) {
+        this.authorizationMethod = undefined;
+        this.authorizationSettings = undefined;
+      }
+    },
+
+    _authSettingsChanged: function(e) {
+      if (this.authorizationMethod && this.authorizationMethod !== e.detail.type) {
+        return;
+      }
+      this.authorizationSettings = e.detail.settings;
+
+      var authHeader;
+      var settings = this.authorizationSettings;
+      switch (this.authorizationMethod) {
+        case 'basic':
+          if (settings.hash) {
+            authHeader = 'Basic ' + settings.hash;
+          }
+          break;
+        case 'oauth2':
+          if (settings.tokenValue) {
+            authHeader = 'Bearer ' + settings.tokenValue;
+          }
+          break;
+      }
+      if (authHeader) {
+        if (/^authorization\s?:\s?.+$/im.test(this.headers)) {
+          this.headers = this.headers.
+            replace(/^(authorization)\s?:\s?.+$/im, '$1: ' + authHeader);
+        } else {
+          if (this.headers) {
+            this.headers += '\nAuthorization: ' + authHeader;
+          } else {
+            this.headers = 'Authorization: ' + authHeader;
+          }
+        }
+      }
     }
   });
   </script>
