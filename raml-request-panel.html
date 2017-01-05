@@ -24,11 +24,12 @@ the License.
 <link rel="import" href="../raml-request-parameters-editor/raml-request-parameters-editor.html">
 <link rel="import" href="../iron-media-query/iron-media-query.html">
 <link rel="import" href="../raml-request-url-editor/raml-request-url-editor.html">
-<link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-progress/paper-progress.html">
 <link rel="import" href="../authorization-panel/authorization-panel.html">
 <link rel="import" href="../oauth-authorization/oauth2-authorization.html">
+<link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
+<link rel="import" href="../fetch-polyfill/fetch-polyfill.html">
 <!--
 The request panel view for the request defined as a RAML method. It is a main view element for the
 API console to display the request panel related to the RAML specification.
@@ -152,11 +153,6 @@ Custom property | Description | Default
         <paper-button class="action-button" on-tap="execute">Run</paper-button>
       </div>
     </div>
-    <iron-ajax id="request"
-      url="[[url]]"
-      headers="[[headers]]"
-      on-response="_internalResponseHandler"
-      on-error="_internalResponseErrorHandler"></iron-ajax>
     <oauth2-authorization></oauth2-authorization>
   </template>
   <script>
@@ -238,9 +234,23 @@ Custom property | Description | Default
         notify: true,
         readOnly: true
       },
-      // The response object from the transport.
+      /**
+       * The request object created by the transport.
+       * It should be the `Request` object as defined in the Fetch API spec.
+       * This element provides the polyfill for this API.
+       */
+      request: {
+        type: Request,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * The response object from the transport.
+       * It should be the `Response` object as defined in the Fetch API spec.
+       * This element provides the polyfill for this API.
+       */
       response: {
-        type: Object,
+        type: Response,
         notify: true,
         readOnly: true
       },
@@ -407,14 +417,6 @@ Custom property | Description | Default
 
       this._setLoadingRequest(true);
 
-      // xhr.addEventListener('progress', function(progress) {
-      //   this._setProgress({
-      //     lengthComputable: progress.lengthComputable,
-      //     loaded: progress.loaded,
-      //     total: progress.total
-      //   });
-      // }.bind(this));
-
       xhr.addEventListener('error', function() {
         console.log(xhr.resposne);
         console.log(xhr.status);
@@ -438,6 +440,12 @@ Custom property | Description | Default
         });
       }.bind(this));
 
+      // The Request init options.
+      var requestInit = {
+        method: data.method,
+        mode: 'cors'
+      };
+
       try {
         xhr.open(data.method, data.url, true);
       } catch (e) {
@@ -446,6 +454,7 @@ Custom property | Description | Default
       }
 
       if (data.headers) {
+        var headersObject = new Headers();
         var headers = data.headers.split('\n').map(function(line) {
           var _parts = line.split(':');
           var _name = _parts[0];
@@ -466,7 +475,9 @@ Custom property | Description | Default
         headers.forEach(function(item) {
           // Iven if error occur the loop will continue.
           xhr.setRequestHeader(item.name, item.value);
+          headersObject.append(item.name, item.value);
         });
+        requestInit.headers = headersObject;
       }
 
       xhr.timeout = 60000;
@@ -474,6 +485,16 @@ Custom property | Description | Default
 
       if (['GET', 'HEAD'].indexOf(data.method) !== -1) {
         data.payload = undefined;
+      } else {
+        if (data.payload) {
+          requestInit.body = data.payload;
+        }
+      }
+
+      try {
+        this._setRequest(new Request(data.url, requestInit));
+      } catch (e) {
+        console.warn(e);
       }
 
       try {
@@ -492,10 +513,43 @@ Custom property | Description | Default
       this._setLoadingRequest(false);
       this._setXhr(undefined);
       this._setResponseIsXhr(true);
-      if (this.responseError || !response.status) {
+      if (this.responseError) {
         return;
       }
-      this._setResponse(response);
+      var originalStatus;
+      if (!response.status) {
+        response.status = 200;
+        originalStatus = 0;
+      } else if (response.status < 200) {
+        originalStatus = response.status;
+        response.status = 200;
+      }
+      var responseInit = {
+        status: response.status,
+        statusText: response.statusText
+      };
+      if (response.headers) {
+        var headersObject = new Headers();
+        response.headers.split('\n').forEach(function(line) {
+          if (!line) {
+            return;
+          }
+          var _parts = line.split(':');
+          var _name = _parts[0];
+          var _value = _parts[1];
+          if (_value) {
+            _value = _value.trim();
+          }
+          try {
+            headersObject.append(_name, _value);
+          } catch (e) {
+            console.warn(e);
+          }
+        });
+        responseInit.headers = headersObject;
+      }
+
+      this._setResponse(new Response(response.data, responseInit));
     },
 
     _internalResponseErrorHandler: function(errorCode) {
@@ -516,6 +570,7 @@ Custom property | Description | Default
           message += 'Request aborted.';
           break;
       }
+      this._setResponse(Response.error());
       this._setResponseError(new Error(message));
     },
 

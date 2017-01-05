@@ -1,3 +1,19 @@
+<a name="0.0.14"></a>
+## [0.0.14](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.8...v0.0.14) (2017-01-05)
+
+
+### Breaking
+
+* Changed the element structure. The responses and documentation panes has been removed. Added the authorization panel ([0c4f2ab03aae171c725fcaa26cefa6032beb3b9b](https://github.com/advanced-rest-client/raml-request-panel/commit/0c4f2ab03aae171c725fcaa26cefa6032beb3b9b))
+* Updated element to work without any RAML data processing. It now expects a method to be passed as a property to this element. ([7b985ae75f742afcfeb4c8bc68aa2eff33dcc1ca](https://github.com/advanced-rest-client/raml-request-panel/commit/7b985ae75f742afcfeb4c8bc68aa2eff33dcc1ca))
+
+### Update
+
+* Changed the API, now the request / response object follow the Fetch API spec ([38074b4ba3bdfcbc15aa4680ff410b4d40f48f4d](https://github.com/advanced-rest-client/raml-request-panel/commit/38074b4ba3bdfcbc15aa4680ff410b4d40f48f4d))
+* updated styles definition ([5389da4bb8b95c43277beb7a2ccabf6aeffcd019](https://github.com/advanced-rest-client/raml-request-panel/commit/5389da4bb8b95c43277beb7a2ccabf6aeffcd019))
+
+
+
 <a name="0.0.13"></a>
 ## [0.0.13](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.8...v0.0.13) (2016-12-23)
 

@@ -37,7 +37,8 @@
     "raml-body-editor-panel": "advanced-rest-client/raml-body-editor-panel#^0.1.1",
     "app-layout": "PolymerElements/app-layout#^0.10.6",
     "authorization-panel": "advanced-rest-client/authorization-panel#^0.1.1",
-    "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.2"
+    "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.2",
+    "fetch-polyfill": "advanced-rest-client/fetch-polyfill#^0.1.1"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#1.0.0",
@@ -60,5 +61,5 @@
     "test",
     "tasks"
   ],
-  "version": "0.0.13"
+  "version": "0.0.14"
 }
