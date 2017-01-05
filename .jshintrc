@@ -17,6 +17,8 @@
   "globals": {
     "Polymer": true,
     "fetch": true,
-    "Headers": true
+    "Headers": true,
+    "Request": true,
+    "Response": true
   }
 }
