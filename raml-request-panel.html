@@ -233,7 +233,7 @@ Custom property | Description | Default
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
       <div class="url-editor">
-        <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-url-editor>
+        <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
         <paper-tab>Parameters</paper-tab>
@@ -242,7 +242,7 @@ Custom property | Description | Default
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
-        <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
+        <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" settings="[[authSettings]]"></authorization-panel>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
