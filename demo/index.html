@@ -21,6 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <link rel="import" href="../../arc-demo-helpers/raml-demo-page.html">
   <link rel="import" href="../raml-request-panel.html">
   <link rel="import" href="../../font-roboto/roboto.html">
+  <link rel="import" href="../../oauth-authorization/oauth2-authorization.html">
   <style is="custom-style">
   :root {
     --paper-tabs-selection-bar-color: rgba(0, 161, 223, 1);
@@ -37,16 +38,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     line-height: 20px;
   }
 
+  raml-request-panel {
+    max-width: 700px;
+  }
+
   </style>
 </head>
 <body unresolved>
   <template is="dom-bind" id="app">
-    <raml-demo-page raml="{{raml}}" no-selector narrow="{{narrow}}">
+    <raml-demo-page selected-object="{{selected}}" narrow="{{narrow}}" is-method="{{isMethod}}">
       <h1>The raml-request-panel element</h1>
       <div main>
-        <raml-request-panel raml="[[raml]]" narrow="[[narrow]]"></raml-request-panel>
+        <template is="dom-if" if="[[isMethod]]" restamp="true">
+          <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]"></raml-request-panel>
+          <template is="dom-if" if="[[response.ok]]">
+            <p>Request succeeded</p>
+          </template>
+          <template is="dom-if" if="[[!response.ok]]">
+            <p>Request error</p>
+            <p>[[responseError.message]]</p>
+          </template>
+        </template>
+        <template is="dom-if" if="[[!isMethod]]">
+          <p>Select a method in the selector.</p>
+        </template>
       </div>
     </raml-demo-page>
+    <oauth2-authorization></oauth2-authorization>
   </template>
+  <script>
+  var scope = document.querySelector('#app');
+  var redirectUrl = location.href.replace(/\/raml-request-panel\/demo(\/)?(index.html)?/,
+    '/oauth-authorization/oauth-popup.html');
+  scope.redirectUrl = redirectUrl;
+  </script>
 </body>
 </html>
