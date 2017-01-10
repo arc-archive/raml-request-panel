@@ -1,3 +1,14 @@
+<a name="0.0.16"></a>
+## [0.0.16](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.14...v0.0.16) (2017-01-10)
+
+
+### Update
+
+* added new element with transport for unhandled requests. Added documentation for the element ([b76c92f5127023daf298551d876b6587597f87a6](https://github.com/advanced-rest-client/raml-request-panel/commit/b76c92f5127023daf298551d876b6587597f87a6))
+* Updated element to work with new parser output ([9ed4284e5b17a0615cf2b7555d815938328708b5](https://github.com/advanced-rest-client/raml-request-panel/commit/9ed4284e5b17a0615cf2b7555d815938328708b5))
+
+
+
 <a name="0.0.15"></a>
 ## [0.0.15](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.14...v0.0.15) (2017-01-10)
 
