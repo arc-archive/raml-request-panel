@@ -134,19 +134,12 @@ Custom property | Description | Default
         <paper-tab>Headers</paper-tab>
         <paper-tab>Authorization</paper-tab>
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
-        <!-- <paper-tab>Responses</paper-tab>
-        <paper-tab>Documentation</paper-tab> -->
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
         <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUrl]]" value="{{url}}"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" settings="[[authSettings]]"></authorization-panel>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
-        <!-- <section>
-          <p hidden$="[[responsePanelHasData]]">Selected method does not have responses defined in the RAML definition.</p>
-          <raml-docs-response-panel narrow="[[narrow]]" hidden$="[[!responsePanelHasData]]" has-responses="{{responsePanelHasData}}" responses="[[method.responses]]"></raml-docs-response-panel>
-        </section>
-        <raml-docs-method-viewer narrow="[[narrow]]" raml="[[method]]" parent-endpoint="[[parentEndpoint]]" auto-hide no-tryit></raml-docs-method-viewer> -->
       </iron-pages>
       <div class="action-bar">
         <paper-progress indeterminate hidden$="[[!loadingRequest]]"></paper-progress>
@@ -408,7 +401,7 @@ Custom property | Description | Default
       var xhr = this.xhr;
       if (xhr) {
         // There is ongoing request
-        // TODO: Set toas with the information.
+        // TODO: Set toast with the information.
         return null;
       }
       this._clearRequestData();
@@ -558,10 +551,10 @@ Custom property | Description | Default
       var message = '';
       switch (errorCode) {
         case 'error':
-          message += 'Request couldn\'t be completed';
+          message += 'The request couldn\'t be completed';
           break;
         case 'run-error':
-          message += 'Request was not started due the error.';
+          message += 'The request was not started due the error.';
           break;
         case 'timeout':
           message += 'Request timeout.';

@@ -41,10 +41,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 <body unresolved>
   <template is="dom-bind" id="app">
-    <raml-demo-page raml="{{raml}}" no-selector narrow="{{narrow}}">
+    <raml-demo-page selected-object="{{selected}}" narrow="{{narrow}}" is-method="{{isMethod}}">
       <h1>The raml-request-panel element</h1>
       <div main>
-        <raml-request-panel raml="[[raml]]" narrow="[[narrow]]"></raml-request-panel>
+        <template is="dom-if" if="[[isMethod]]" restamp="true">
+          <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}"></raml-request-panel>
+          <template is="dom-if" if="[[response.ok]]">
+            <p>Request succeeded</p>
+          </template>
+          <template is="dom-if" if="[[!response.ok]]">
+            <p>Request error</p>
+            <p>[[responseError.message]]</p>
+          </template>
+        </template>
+        <template is="dom-if" if="[[!isMethod]]">
+          <p>Select a method in the selector.</p>
+        </template>
       </div>
     </raml-demo-page>
   </template>
