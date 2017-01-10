@@ -30,18 +30,127 @@ the License.
 <link rel="import" href="../oauth-authorization/oauth2-authorization.html">
 <link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
 <link rel="import" href="../fetch-polyfill/fetch-polyfill.html">
-<!--
-The request panel view for the request defined as a RAML method. It is a main view element for the
-API console to display the request panel related to the RAML specification.
+<link rel="import" href="raml-request-panel-simple-xhr.html">
 
-This element is meant to be used with RAML specification. See demo for usage information.
+<!--
+The request panel view for the request defined as a RAML method.
+It is a main view element for the API console to display the request panel related to the RAML
+specification.
 
 NOTE: This is aplha version. This element WILL change.
 
+The element has it's own XHR / Fetch transport method and it will be used if the hostng application
+do not handle the `api-console-request` event.
+
+When the user request to make the HTTP request then cancellable `api-console-request` event will
+be fired with the request details (see below).
+The hosting application, if it about to use different transport method, should cancel the event by
+calling `preventDefault()` function on the event (and possibly `stopPropagation()`) and handle the
+request. If the event was not prevented (canceled) then internall Fetch/XHR will be used.
+
+When the request is ready then the hosting app must fire the `api-console-response` event with
+created Request and Response objects. This element listens on the `window` property for the
+`api-console-response` event.
+
+## Events
+### api-console-request
+This event is fired when the user request to make a HTTP request.
+This event will have the following properties set on the `detail` object:
+
+Property | Type | Description
+----------------|-------------|----------
+`url` | String | The request URL
+`method` | String | The HTTP method
+`headers` | String | Headers to send
+`payload` | String | Payload to send
+`auth` | Object | Optional. For some authorization methodss (like NTLM) the authorization header or query param can't be set and the authorization must be made on the connection. In this cases the auth object will be set with `type` and `settings` properties. While `type` is the name of the authorization method, the `settings` object depends on the authorization method and may vary. Detailed documentation for the auth methods is in the `auth-methods` element.
+
+### api-console-response
+This event must be fired when the hosring app finish the request. It must contains generated Request
+and Response object according to the [Fetch specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch).
+
+Becaue the Fetch API is a new API not all browsers support it. In this case the polyfill must be used
+in the hosted app. Add the `fetch-polyfill` element (advanced-rest-client/fetch-polyfill) to the
+hosted app to have the support. It is recommended to use this element so the polyfill will be loaded
+only once. See the `raml-request-panel-simple-xhr` element for example implementation.
+
+Property | Type | Description
+----------------|-------------|----------
+`request` | Object | The request object as defined in the Fetch API spec.
+`response` | Object | The response object as defined in the Fetch API spec.
+`isXhr` | Boolean | If not set the element assumes it's true. Indicated if the transport method doesn't support advanced timings and redirects information. See below.
+`error` | Error | When the request / response is errored (`request.ok` equals `false`) then the error object should be set with the human readable message that will be displayed to the user.
+
 ### Example
 ```
-<raml-request-panel></raml-request-panel>
+<raml-request-panel
+  method="[[ramlMethod]]"
+  response="{{response}}"
+  response-error="{{responseError}}"
+  redirect-url="http://oauth.callback.url"></raml-request-panel>
 ```
+
+## Advanced transport options
+The response panel in the ARC elements is able to display the response in simple and advanced view.
+
+Simple is meant to be used when the HTTP request has been made by the simple transports like XHR or
+Fetch. It just displays the response status, headers and paylaod.
+
+Advanced view is reserved for transport methods that are able to generate additional informations
+about the request and resposne. This information is timings for the request/response, timings for
+the redirects and information about redirects.
+
+When the advanced options are set then the `isXhr` flag on the `api-console-response` event's detail
+object must be set to true.
+
+#### timings
+The `timings` propery added to the `api-console-response` is the request / response timings as
+defined in HAR 1.2 spec. For example:
+```
+"timings": {
+  "blocked": 0,
+  "dns": -1,
+  "connect": 15,
+  "send": 20,
+  "wait": 38,
+  "receive": 12,
+  "ssl": -1,
+  "comment": ""
+}
+```
+
+#### redirect-timings
+The `redirect-timings` propery added to the `api-console-response` is the list of the `timings`
+objects as defined in HAR 1.2 specification.
+The list should be ordered list of redirections. For example:
+
+```
+"redirect-timings": [{
+  "blocked": 0,
+  "dns": -1,
+  "connect": 15,
+  "send": 20,
+  "wait": 38,
+  "receive": 12,
+  "ssl": -1,
+  "comment": ""
+}]
+```
+
+#### redirects
+The `redirects` property added to the `api-console-response` event is the list of objects. Each
+object should have the `headers` property as a HTTP headers string, `status` as a HTTP status
+and optionally `statusText`. It is consisted with the `Response` object except the headers are
+String instead of the Headers object.
+
+```
+"redirects": [Response {
+  "status": 301,
+  "statusText": "Moved Permanently",
+  "headers": "Content-lenght: 0"
+}]
+```
+
 
 ### Styling
 `<raml-request-panel>` provides the following custom properties and mixins for styling:
@@ -108,10 +217,7 @@ Custom property | Description | Default
     }
 
     raml-request-url-editor {
-      /* window width - drawer width - paddings */
-      /*width: calc(100vw - var(--raml-request-panel-navigation-width, 256px) - 16px);*/
       @apply(--layout-flex);
-      overflow: auto;
     }
 
     :host([narrow]) .content {
@@ -132,7 +238,7 @@ Custom property | Description | Default
       <paper-tabs selected="{{selectedTab}}">
         <paper-tab>Parameters</paper-tab>
         <paper-tab>Headers</paper-tab>
-        <paper-tab>Authorization</paper-tab>
+        <paper-tab hidden$="[[!authRequired]]">Authorization</paper-tab>
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
@@ -147,33 +253,17 @@ Custom property | Description | Default
       </div>
     </div>
     <oauth2-authorization></oauth2-authorization>
+    <raml-request-panel-simple-xhr id="xhr"></raml-request-panel-simple-xhr>
   </template>
   <script>
   Polymer({
     is: 'raml-request-panel',
     properties: {
       /**
-       * A reference to the XMLHttpRequest instance used to generate the
-       * network request.
-       *
-       * @type {XMLHttpRequest}
-       */
-      xhr: {
-        type: Object,
-        readOnly: true
-      },
-      /**
        * A RAML node representing a method node in RAML definition.
        * It should be obtained from the `raml-path-to-object` element.
        */
       method: Object,
-      // Parent endpoint for selected method.
-      parentEndpoint: Object,
-      // Selected path.
-      path: {
-        type: String,
-        notify: true
-      },
       // Selected request tab.
       selectedTab: {
         type: Number,
@@ -195,12 +285,6 @@ Custom property | Description | Default
       headers: String,
       // Body for the request
       payload: String,
-
-      // True when the response documentation pane has data
-      responsePanelHasData: {
-        type: Boolean,
-        value: false
-      },
       /**
        * If set it will renders the view in the narrow layout.
        */
@@ -254,17 +338,6 @@ Custom property | Description | Default
         readOnly: true
       },
       /**
-       * If internal request object is used to make a request then it will use this setting
-       * to set the XHR's `withCredentials` property.
-       * If set to true it will send user cookies with the request. However if the `OPTIONS`
-       * response's `Access-Control-Allow-Origin` header come back with the wildcard `*` then
-       * it's an error and the request won't be performed.
-       */
-      withCredentials: {
-        type: Boolean,
-        value: false
-      },
-      /**
        * Current authorization settings from the `authorization-panel`
        * element.
        */
@@ -279,24 +352,33 @@ Custom property | Description | Default
       authRequired: {
         type: Boolean,
         value: false,
-        computed: '_computeAuthRequired(raml.securedBy)'
+        computed: '_computeAuthRequired(method.securedBy)'
       },
       // OAuth2 redirect URL
       redirectUrl: String,
-      // Selected by the user auth method (id any)
+      // Selected by the user auth method (if any)
       authorizationMethod: String,
       // Current authorization settings.
       authorizationSettings: Object
     },
 
     observers: [
-      '_isPayloadRequestChanged(isPayloadRequest)'
+      '_isPayloadRequestChanged(isPayloadRequest)',
+      '_authRequiredChanged(authRequired)'
     ],
 
     listeners: {
       'authorization-enabled': '_authMethodEnabled',
       'authorization-disabled': '_authMethodDisabled',
       'auth-settings-changed': '_authSettingsChanged'
+    },
+
+    attached: function() {
+      this.listen(window, 'api-console-response', '_responseHandler');
+    },
+
+    detached: function() {
+      this.unlisten(window, 'api-console-response', '_responseHandler');
     },
 
     // Computes if passed argumet is trully.
@@ -312,16 +394,28 @@ Custom property | Description | Default
       return ['get', 'head'].indexOf(base.method) === -1;
     },
 
-    _isPayloadRequestChanged: function() {
+    _isPayloadRequestChanged: function(required) {
       var tabs = this.$$('paper-tabs');
       if (!tabs) {
         return;
       }
       tabs.notifyResize();
-      if (tabs.selected === 3) {
+      if (required && tabs.selected === 3) {
         tabs.selected = 0;
       }
     },
+
+    _authRequiredChanged: function(required) {
+      var tabs = this.$$('paper-tabs');
+      if (!tabs) {
+        return;
+      }
+      tabs.notifyResize();
+      if (required && tabs.selected === 2) {
+        tabs.selected = 0;
+      }
+    },
+
     // Computes if the method has `securedBy` defined.
     _computeAuthRequired: function(securedBy) {
       if (!securedBy || !securedBy.length) {
@@ -337,13 +431,14 @@ Custom property | Description | Default
      * will attempt to make a request usnig XHR object.
      */
     execute: function() {
+      this._clearRequestData();
       var event = new CustomEvent('api-console-request', {
         cancelable: true,
         bubbles: true,
         composed: true,
         detail: this.serializeRequest()
       });
-
+      this.dispatchEvent(event);
       if (!event.defaultPrevented) {
         this._executeRequest(event.detail);
       } else {
@@ -357,6 +452,17 @@ Custom property | Description | Default
      * - url (String)
      * - headers (String)
      * - payload (String)
+     * - auth (Object)
+     *
+     * The `auth` property is optional and is only added to the request if simple `authorization`
+     * header will not work. For example NTLM auth method has to be made on a single socket
+     * connection (authorization and the request) so it can't be made before the request.
+     *
+     * The `auth` object contains 2 properties:
+     * - type (String) the authorization type - one of from the `auth-methods` element
+     * - settings (Object) Authorization parameters entered by the user. It vary and depends on
+     * selected auth method. For example in case of the NTLM it will be: `username`, `password` and
+     * `domain`.
      */
     serializeRequest: function() {
       var result = {
@@ -398,179 +504,22 @@ Custom property | Description | Default
     },
 
     _executeRequest: function(data) {
-      var xhr = this.xhr;
-      if (xhr) {
-        // There is ongoing request
-        // TODO: Set toast with the information.
-        return null;
-      }
-      this._clearRequestData();
-      xhr = new XMLHttpRequest();
-      this._setXhr(xhr);
-
-      this._setLoadingRequest(true);
-
-      xhr.addEventListener('error', function() {
-        console.log(xhr.resposne);
-        console.log(xhr.status);
-        this._internalResponseErrorHandler('error');
-      }.bind(this));
-
-      xhr.addEventListener('timeout', function() {
-        this._internalResponseErrorHandler('timeout');
-      }.bind(this));
-      xhr.addEventListener('abort', function() {
-        this._internalResponseErrorHandler('abort');
-      }.bind(this));
-
-      // Called after all of the above.
-      xhr.addEventListener('loadend', function(e) {
-        this._internalResponseHandler({
-          data: e.target.response,
-          status: e.target.status,
-          statusText: e.target.statusText,
-          headers: e.target.getAllResponseHeaders()
-        });
-      }.bind(this));
-
-      // The Request init options.
-      var requestInit = {
-        method: data.method,
-        mode: 'cors'
-      };
-
-      try {
-        xhr.open(data.method, data.url, true);
-      } catch (e) {
-        this._internalResponseErrorHandler('run-error');
-        return;
-      }
-
-      if (data.headers) {
-        var headersObject = new Headers();
-        var headers = data.headers.split('\n').map(function(line) {
-          var _parts = line.split(':');
-          var _name = _parts[0];
-          var _value = _parts[1];
-          _name = _name ? _name.trim() : null;
-          _value = _value ? _value.trim() : null;
-          if (!_name || !_value) {
-            return null;
-          }
-          return {
-            name: _name,
-            value: _value
-          };
-        }).filter(function(item) {
-          return !!item;
-        });
-
-        headers.forEach(function(item) {
-          // Iven if error occur the loop will continue.
-          xhr.setRequestHeader(item.name, item.value);
-          headersObject.append(item.name, item.value);
-        });
-        requestInit.headers = headersObject;
-      }
-
-      xhr.timeout = 60000;
-      xhr.withCredentials = this.withCredentials;
-
-      if (['GET', 'HEAD'].indexOf(data.method) !== -1) {
-        data.payload = undefined;
-      } else {
-        if (data.payload) {
-          requestInit.body = data.payload;
-        }
-      }
-
-      try {
-        this._setRequest(new Request(data.url, requestInit));
-      } catch (e) {
-        console.warn(e);
-      }
-
-      try {
-        xhr.send(data.payload);
-      } catch (e) {
-        this._internalResponseErrorHandler('run-error');
-      }
-
-    },
-    /**
-     * A handler for the response from the `<iron-ajax>` element.
-     * This can occur only when the request wasn't handled by the hosting app and internal
-     * request has been made.
-     */
-    _internalResponseHandler: function(response) {
-      this._setLoadingRequest(false);
-      this._setXhr(undefined);
-      this._setResponseIsXhr(true);
-      if (this.responseError) {
-        return;
-      }
-      var originalStatus;
-      if (!response.status) {
-        response.status = 200;
-        originalStatus = 0;
-      } else if (response.status < 200) {
-        originalStatus = response.status;
-        response.status = 200;
-      }
-      var responseInit = {
-        status: response.status,
-        statusText: response.statusText
-      };
-      if (response.headers) {
-        var headersObject = new Headers();
-        response.headers.split('\n').forEach(function(line) {
-          if (!line) {
-            return;
-          }
-          var _parts = line.split(':');
-          var _name = _parts[0];
-          var _value = _parts[1];
-          if (_value) {
-            _value = _value.trim();
-          }
-          try {
-            headersObject.append(_name, _value);
-          } catch (e) {
-            console.warn(e);
-          }
-        });
-        responseInit.headers = headersObject;
-      }
-
-      this._setResponse(new Response(response.data, responseInit));
+      this.$.xhr.execute(data);
     },
 
-    _internalResponseErrorHandler: function(errorCode) {
-      this._setXhr(undefined);
-      this._setLoadingRequest(false);
-      var message = '';
-      switch (errorCode) {
-        case 'error':
-          message += 'The request couldn\'t be completed';
-          break;
-        case 'run-error':
-          message += 'The request was not started due the error.';
-          break;
-        case 'timeout':
-          message += 'Request timeout.';
-          break;
-        case 'abort':
-          message += 'Request aborted.';
-          break;
-      }
-      this._setResponse(Response.error());
-      this._setResponseError(new Error(message));
+    // A handler for the `api-console-response` event.
+    _responseHandler: function(e) {
+      this._setResponseIsXhr(e.detail.isXhr || true);
+      this._setResponse(e.detail.response);
+      this._setResponseError(e.detail.error);
+      this._setRequest(e.detail.request);
     },
 
     _clearRequestData: function() {
       this._setResponseIsXhr(false);
       this._setResponse(undefined);
       this._setResponseError(undefined);
+      this._setRequest(undefined);
     },
 
     _authMethodEnabled: function(e) {
