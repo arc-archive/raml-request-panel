@@ -18,10 +18,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../iron-test-helpers/test-helpers.js"></script>
     <script src="../../iron-test-helpers/mock-interactions.js"></script>
 
-    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../../fetch-polyfill/fetch-polyfill.html">
+    <link rel="import" href="../../raml-js-parser/raml-js-parser.html">
     <link rel="import" href="../raml-request-panel.html">
   </head>
   <body>
+
+    <test-fixture id="parser">
+      <template>
+        <raml-js-parser normalize-raml></raml-js-parser>
+      </template>
+    </test-fixture>
 
     <test-fixture id="basic">
       <template>
@@ -30,11 +37,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </test-fixture>
 
     <script>
-    /* global suite, test, fixture, assert */
+    /* global suite, test, fixture, assert, TestHelpers, sinon */
     suite('basic', function() {
-      test('`raml-request-panel` should be initialized', function() {
-        var element = fixture('basic');
-        assert.equal(element.isAttached, true, 'element.isAttached equals true');
+
+      var element;
+      var raml;
+      setup(function(done) {
+        var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+        element = fixture('basic');
+        var parser = fixture('parser');
+        parser.loadApi(baseUrl + 'test.raml')
+        .then(function() {
+          raml = parser.get('latestJson.specification');
+          element.method = parser.get('latestJson.specification.resources.0.methods.0');
+          TestHelpers.forceXIfStamp(element);
+          done();
+        })
+        .catch(function(e) {
+          done(e);
+        });
+      });
+
+      test('isPayloadRequest is false', function() {
+        assert.isFalse(element.isPayloadRequest, 'isPayloadRequest is false');
+      });
+
+      test('authRequired is false', function() {
+        assert.isFalse(element.authRequired, 'authRequired is false');
+      });
+
+      test('Should serialize request', function() {
+        var request = {
+          method: 'GET',
+          url: element.method.absoluteUri,
+          headers: '',
+          payload: ''
+        };
+        assert.deepEqual(element.serializeRequest(), request);
+      });
+
+      test('Should fire `api-console-request` event', function() {
+        var spy = sinon.stub();
+        element.addEventListener('api-console-request', spy);
+        element.execute();
+        assert.isTrue(spy.calledOnce, 'variables-model-query was not fired');
+      });
+
+      test('Should `api-console-request` have the request details', function(done) {
+        element.addEventListener('api-console-request', function(e) {
+          var request = {
+            method: 'GET',
+            url: element.method.absoluteUri,
+            headers: '',
+            payload: ''
+          };
+          assert.deepEqual(e.detail, request);
+          done();
+        });
+        element.execute();
+      });
+
+      test('Should `api-console-response-ready` be fired with response details', function(done) {
+        element.addEventListener('api-console-response-ready', function(e) {
+          assert.isTrue(e.detail.isXhr);
+          assert.instanceOf(e.detail.response, Response, 'chai is an instance of tea');
+          assert.instanceOf(e.detail.responseError, Error);
+          assert.instanceOf(e.detail.request, Request);
+          assert.isNumber(e.detail.loadingTime);
+          assert.isUndefined(e.detail.timings);
+          assert.isUndefined(e.detail.redirectTimings);
+          assert.isUndefined(e.detail.redirects);
+          assert.isUndefined(e.detail.sourceMessage);
+          done();
+        });
+        element.execute();
       });
     });
     </script>

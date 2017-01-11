@@ -4,7 +4,8 @@
   "license": "Apache-2.0 OR CC-BY-4.0",
   "description": "The request panel view for the request defined as a RAML method",
   "devDependencies": {
-    "polymer-cli": "^0.16.0"
+    "polymer-cli": "^0.16.0",
+    "web-component-tester-istanbul": "^0.10.0"
   },
   "engines": {
     "node": ">=0.10.0"
