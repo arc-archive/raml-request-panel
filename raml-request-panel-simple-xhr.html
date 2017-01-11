@@ -124,6 +124,7 @@ Because this element fires back an event it has to be attached to the DOM.
         this._finishRequest();
       }.bind(this))
       .catch(function(e) {
+        this.loadingTime = performance.now() - requestStart;
         this.response = Response.error();
         this.error = e;
         this._finishRequest();

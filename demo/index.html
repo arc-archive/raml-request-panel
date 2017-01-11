@@ -50,13 +50,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <h1>The raml-request-panel element</h1>
       <div main>
         <template is="dom-if" if="[[isMethod]]" restamp="true">
-          <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]"></raml-request-panel>
+          <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]" loading-time="{{loadingTime}}"></raml-request-panel>
           <template is="dom-if" if="[[response.ok]]">
             <p>Request succeeded</p>
+            <p>Loading time: [[loadingTime]] ms</p>
           </template>
           <template is="dom-if" if="[[!response.ok]]">
             <p>Request error</p>
             <p>[[responseError.message]]</p>
+            <p>Loading time: [[loadingTime]] ms</p>
           </template>
         </template>
         <template is="dom-if" if="[[!isMethod]]">

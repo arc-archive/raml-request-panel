@@ -80,14 +80,19 @@ Property | Type | Description
 `response` | Object | The response object as defined in the Fetch API spec.
 `isXhr` | Boolean | If not set the element assumes it's true. Indicated if the transport method doesn't support advanced timings and redirects information. See below.
 `error` | Error | When the request / response is errored (`request.ok` equals `false`) then the error object should be set with the human readable message that will be displayed to the user.
+`loadingTime` | Number | The response full loading time
+
+See `Advanced transport options` for more event options.
 
 ### Example
 ```
 <raml-request-panel
   method="[[ramlMethod]]"
+  redirect-url="http://oauth.redirect.url"
+  request="{{request}}"
   response="{{response}}"
   response-error="{{responseError}}"
-  redirect-url="http://oauth.callback.url"></raml-request-panel>
+  loading-time="{{loadingTime}}"></raml-request-panel>
 ```
 
 ## Advanced transport options
@@ -118,9 +123,11 @@ defined in HAR 1.2 spec. For example:
   "comment": ""
 }
 ```
+If the `timings` property is set the `loadingTime` property is optional since it will be calculated
+from the detailed timing.
 
-#### redirect-timings
-The `redirect-timings` propery added to the `api-console-response` is the list of the `timings`
+#### redirectTimings
+The `redirectTimings` propery added to the `api-console-response` is the list of the `timings`
 objects as defined in HAR 1.2 specification.
 The list should be ordered list of redirections. For example:
 
@@ -344,6 +351,32 @@ Custom property | Description | Default
         readOnly: true
       },
       /**
+       * If the transport method is able to collect detailed information about request timings
+       * then this value will be set. It's the `timings` property from the HAR 1.2 spec.
+       */
+      timings: {
+        type: Number,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * If the transport method is able to collect detailed information about redirects timings
+       * then this value will be set. It's a list of `timings` property from the HAR 1.2 spec.
+       */
+      redirectTimings: {
+        type: Number,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * It will be set if the transport method can generate information about redirections.
+       */
+      redirects: {
+        type: Number,
+        notify: true,
+        readOnly: true
+      },
+      /**
        * Current authorization settings from the `authorization-panel`
        * element.
        */
@@ -511,6 +544,10 @@ Custom property | Description | Default
       this._setResponse(e.detail.response);
       this._setResponseError(e.detail.error);
       this._setRequest(e.detail.request);
+      this._setLoadingTime(e.detail.loadingTime);
+      this._setTimings(e.detail.timings);
+      this._setRedirectTimings(e.detail.redirectTimings);
+      this._setRedirects(e.detail.redirects);
     },
 
     _clearRequestData: function() {
@@ -518,6 +555,10 @@ Custom property | Description | Default
       this._setResponse(undefined);
       this._setResponseError(undefined);
       this._setRequest(undefined);
+      this._setLoadingTime(undefined);
+      this._setTimings(undefined);
+      this._setRedirectTimings(undefined);
+      this._setRedirects(undefined);
     },
 
     _authMethodEnabled: function(e) {
