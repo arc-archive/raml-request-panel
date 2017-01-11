@@ -37,8 +37,6 @@ The request panel view for the request defined as a RAML method.
 It is a main view element for the API console to display the request panel related to the RAML
 specification.
 
-NOTE: This is aplha version. This element WILL change.
-
 The element has it's own XHR / Fetch transport method and it will be used if the hostng application
 do not handle the `api-console-request` event.
 
@@ -80,14 +78,19 @@ Property | Type | Description
 `response` | Object | The response object as defined in the Fetch API spec.
 `isXhr` | Boolean | If not set the element assumes it's true. Indicated if the transport method doesn't support advanced timings and redirects information. See below.
 `error` | Error | When the request / response is errored (`request.ok` equals `false`) then the error object should be set with the human readable message that will be displayed to the user.
+`loadingTime` | Number | The response full loading time
+
+See `Advanced transport options` for more event options.
 
 ### Example
 ```
 <raml-request-panel
   method="[[ramlMethod]]"
+  redirect-url="http://oauth.redirect.url"
+  request="{{request}}"
   response="{{response}}"
   response-error="{{responseError}}"
-  redirect-url="http://oauth.callback.url"></raml-request-panel>
+  loading-time="{{loadingTime}}"></raml-request-panel>
 ```
 
 ## Advanced transport options
@@ -118,9 +121,11 @@ defined in HAR 1.2 spec. For example:
   "comment": ""
 }
 ```
+If the `timings` property is set the `loadingTime` property is optional since it will be calculated
+from the detailed timing.
 
-#### redirect-timings
-The `redirect-timings` propery added to the `api-console-response` is the list of the `timings`
+#### redirectTimings
+The `redirectTimings` propery added to the `api-console-response` is the list of the `timings`
 objects as defined in HAR 1.2 specification.
 The list should be ordered list of redirections. For example:
 
@@ -151,6 +156,30 @@ String instead of the Headers object.
 }]
 ```
 
+#### sourceMessage
+The HTTP source message sent to the server. It should be full message from the message header to
+the request body.
+
+### Advanced event example
+```
+var event = new CustomEvent('api-console-response', {
+  cancelable: true,
+  bubbles: true,
+  composed: true,
+  detail: {
+    isXhr: true,
+    request: request,
+    response: response,
+    error: new Error('Dummy error'), // Has the response details so it shouldn't be set.
+    loadingTime: 125, // This is optional because timings is set
+    timings: { dns: 123, ... }
+    redirectTimings: [{ dns: 123, ... }],
+    redirects: [redirectResponse1, ...],
+    sourceMessage: 'HTTP/1.1 200 OK\n ....'
+  }
+});
+document.body.dispatchEvent(event);
+```
 
 ### Styling
 `<raml-request-panel>` provides the following custom properties and mixins for styling:
@@ -164,6 +193,9 @@ Custom property | Description | Default
 `--action-button` | Mixin applied ot the action button | `{}`
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
+
+You can set the `narrow` property so the element will be rendered in the mobile view.
+This property will be propagated to all sub-elements that uses this property to change layout.
 
 @group RAML Elements
 @element raml-request-panel
@@ -258,6 +290,23 @@ Custom property | Description | Default
   <script>
   Polymer({
     is: 'raml-request-panel',
+
+    /**
+     * Fired when the response has been recorded and request, response, redirects and timings data
+     * are set.
+     *
+     * @event api-console-response-ready
+     *
+     * @param {Boolean} isXhr True if the transport method is a basic transport.
+     * @param {Response} response The response object
+     * @param {Error} responseError Error object if the response is errored
+     * @param {Request} request The request object.
+     * @param {Number} loadingTime Request loading time
+     * @param {Object} timings As defined in HAR 1.2 timnings object
+     * @param {Array<Object>} redirectTimings List of redirect timings
+     * @param {Array} redirects List of redirect Responses
+     * @param {String} sourceMessage Source HTTP message sent to the server.
+     */
     properties: {
       /**
        * A RAML node representing a method node in RAML definition.
@@ -285,6 +334,8 @@ Custom property | Description | Default
       headers: String,
       // Body for the request
       payload: String,
+      // Current URL
+      url: String,
       /**
        * If set it will renders the view in the narrow layout.
        */
@@ -337,15 +388,53 @@ Custom property | Description | Default
         notify: true,
         readOnly: true
       },
+      // Response full loading time.
+      loadingTime: {
+        type: Number,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * If the transport method is able to collect detailed information about request timings
+       * then this value will be set. It's the `timings` property from the HAR 1.2 spec.
+       */
+      timings: {
+        type: Object,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * If the transport method is able to collect detailed information about redirects timings
+       * then this value will be set. It's a list of `timings` property from the HAR 1.2 spec.
+       */
+      redirectTimings: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * It will be set if the transport method can generate information about redirections.
+       */
+      redirects: {
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * Http message sent to the server.
+       *
+       * This information should be available only in case of advanced HTTP transport.
+       */
+      sourceMessage: {
+        type: String,
+        notify: true,
+        readOnly: true
+      },
       /**
        * Current authorization settings from the `authorization-panel`
        * element.
        */
       authSettings: {
-        type: Object
-      },
-      // The RAML definition JSON object
-      raml: {
         type: Object
       },
       // Computed value if current method is secured
@@ -381,10 +470,6 @@ Custom property | Description | Default
       this.unlisten(window, 'api-console-response', '_responseHandler');
     },
 
-    // Computes if passed argumet is trully.
-    _computeHasData: function(raml) {
-      return !!raml;
-    },
     // Computes boolean value if the selected object (method) can carry a payload
     _computeIsPayloadRequest: function(record) {
       var base = record.base;
@@ -513,6 +598,22 @@ Custom property | Description | Default
       this._setResponse(e.detail.response);
       this._setResponseError(e.detail.error);
       this._setRequest(e.detail.request);
+      this._setLoadingTime(e.detail.loadingTime);
+      this._setTimings(e.detail.timings);
+      this._setRedirectTimings(e.detail.redirectTimings);
+      this._setRedirects(e.detail.redirects);
+      this._setSourceMessage(e.detail.sourceMessage);
+      this.fire('api-console-response-ready', {
+        isXhr: e.detail.isXhr,
+        response: e.detail.response,
+        responseError: e.detail.error,
+        request: e.detail.request,
+        loadingTime: e.detail.loadingTime,
+        timings: e.detail.timings,
+        redirectTimings: e.detail.redirectTimings,
+        redirects: e.detail.redirects,
+        sourceMessage: e.detail.sourceMessage
+      });
     },
 
     _clearRequestData: function() {
@@ -520,6 +621,10 @@ Custom property | Description | Default
       this._setResponse(undefined);
       this._setResponseError(undefined);
       this._setRequest(undefined);
+      this._setLoadingTime(undefined);
+      this._setTimings(undefined);
+      this._setRedirectTimings(undefined);
+      this._setRedirects(undefined);
     },
 
     _authMethodEnabled: function(e) {

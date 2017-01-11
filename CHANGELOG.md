@@ -1,3 +1,26 @@
+<a name="0.1.1"></a>
+## [0.1.1](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.16...v0.1.1) (2017-01-11)
+
+
+### Docs
+
+* Updated documentation ([7e7797d631909fb5c90d10bd79b8ae0d55aae492](https://github.com/advanced-rest-client/raml-request-panel/commit/7e7797d631909fb5c90d10bd79b8ae0d55aae492))
+
+### New
+
+* Added basic test ([878f0dac89c15eb4983d45ccd62e78e70f7ee5bd](https://github.com/advanced-rest-client/raml-request-panel/commit/878f0dac89c15eb4983d45ccd62e78e70f7ee5bd))
+* Added the loading time property ([2d56c4c491680e9347e3caef0d02ce223273018e](https://github.com/advanced-rest-client/raml-request-panel/commit/2d56c4c491680e9347e3caef0d02ce223273018e))
+
+### Update
+
+* Added missing url property ([af681ceb50b1f510f313d213e489ccc27892869a](https://github.com/advanced-rest-client/raml-request-panel/commit/af681ceb50b1f510f313d213e489ccc27892869a))
+* Added sourceMessage property and api-console-response-ready event ([2f8d5f7ee80fa6f273b921d1338f4ddc79a3e4bf](https://github.com/advanced-rest-client/raml-request-panel/commit/2f8d5f7ee80fa6f273b921d1338f4ddc79a3e4bf))
+* Added timings properties according to api-console-response event description ([ab419d29122d6d5b29ac0f64e6832518be84b662](https://github.com/advanced-rest-client/raml-request-panel/commit/ab419d29122d6d5b29ac0f64e6832518be84b662))
+* Bumped version. The element is now outside the develpop, unstable version ([24f9e0130f139acf2c3cc4f12afe3bfc452ab023](https://github.com/advanced-rest-client/raml-request-panel/commit/24f9e0130f139acf2c3cc4f12afe3bfc452ab023))
+* Updated event variable name ([da540a22e91d919145064cc35dbb2e6b55289423](https://github.com/advanced-rest-client/raml-request-panel/commit/da540a22e91d919145064cc35dbb2e6b55289423))
+
+
+
 <a name="0.0.16"></a>
 ## [0.0.16](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.14...v0.0.16) (2017-01-10)
 
