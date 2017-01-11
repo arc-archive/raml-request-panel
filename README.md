@@ -6,8 +6,6 @@ The request panel view for the request defined as a RAML method.
 It is a main view element for the API console to display the request panel related to the RAML
 specification.
 
-NOTE: This is aplha version. This element WILL change.
-
 The element has it's own XHR / Fetch transport method and it will be used if the hostng application
 do not handle the `api-console-request` event.
 
@@ -49,14 +47,19 @@ Property | Type | Description
 `response` | Object | The response object as defined in the Fetch API spec.
 `isXhr` | Boolean | If not set the element assumes it's true. Indicated if the transport method doesn't support advanced timings and redirects information. See below.
 `error` | Error | When the request / response is errored (`request.ok` equals `false`) then the error object should be set with the human readable message that will be displayed to the user.
+`loadingTime` | Number | The response full loading time
+
+See `Advanced transport options` for more event options.
 
 ### Example
 ```
 <raml-request-panel
   method="[[ramlMethod]]"
+  redirect-url="http://oauth.redirect.url"
+  request="{{request}}"
   response="{{response}}"
   response-error="{{responseError}}"
-  redirect-url="http://oauth.callback.url"></raml-request-panel>
+  loading-time="{{loadingTime}}"></raml-request-panel>
 ```
 
 ## Advanced transport options
@@ -87,9 +90,11 @@ defined in HAR 1.2 spec. For example:
   "comment": ""
 }
 ```
+If the `timings` property is set the `loadingTime` property is optional since it will be calculated
+from the detailed timing.
 
-#### redirect-timings
-The `redirect-timings` propery added to the `api-console-response` is the list of the `timings`
+#### redirectTimings
+The `redirectTimings` propery added to the `api-console-response` is the list of the `timings`
 objects as defined in HAR 1.2 specification.
 The list should be ordered list of redirections. For example:
 
@@ -120,6 +125,30 @@ String instead of the Headers object.
 }]
 ```
 
+#### sourceMessage
+The HTTP source message sent to the server. It should be full message from the message header to
+the request body.
+
+### Advanced event example
+```
+var event = new CustomEvent('api-console-response', {
+  cancelable: true,
+  bubbles: true,
+  composed: true,
+  detail: {
+    isXhr: true,
+    request: request,
+    response: response,
+    error: new Error('Dummy error'), // Has the response details so it shouldn't be set.
+    loadingTime: 125, // This is optional because timings is set
+    timings: { dns: 123, ... }
+    redirectTimings: [{ dns: 123, ... }],
+    redirects: [redirectResponse1, ...],
+    sourceMessage: 'HTTP/1.1 200 OK\n ....'
+  }
+});
+document.body.dispatchEvent(event);
+```
 
 ### Styling
 `<raml-request-panel>` provides the following custom properties and mixins for styling:
@@ -134,6 +163,23 @@ Custom property | Description | Default
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
 
+You can set the `narrow` property so the element will be rendered in the mobile view.
+This property will be propagated to all sub-elements that uses this property to change layout.
+
+
+
+### Events
+| Name | Description | Params |
+| --- | --- | --- |
+| api-console-response-ready | Fired when the response has been recorded and request, response, redirects and timings data are set. | isXhr **Boolean** - True if the transport method is a basic transport. |
+response **Response** - The response object |
+responseError **Error** - Error object if the response is errored |
+request **Request** - The request object. |
+loadingTime **Number** - Request loading time |
+timings **Object** - As defined in HAR 1.2 timnings object |
+redirectTimings **Array.<Object>** - List of redirect timings |
+redirects **Array** - List of redirect Responses |
+sourceMessage **String** - Source HTTP message sent to the server. |
 # raml-request-panel-simple-xhr
 
 
