@@ -276,7 +276,7 @@ Custom property | Description | Default
      *
      * @event api-console-response-ready
      *
-     * @param {Boolean} responseIsXhr
+     * @param {Boolean} isXhr True if the transport method is a basic transport.
      * @param {Response} response The response object
      * @param {Error} responseError Error object if the response is errored
      * @param {Request} request The request object.
@@ -583,7 +583,7 @@ Custom property | Description | Default
       this._setRedirects(e.detail.redirects);
       this._setSourceMessage(e.detail.sourceMessage);
       this.fire('api-console-response-ready', {
-        responseIsXhr: e.detail.isXhr,
+        isXhr: e.detail.isXhr,
         response: e.detail.response,
         responseError: e.detail.error,
         request: e.detail.request,
