@@ -158,6 +158,10 @@ String instead of the Headers object.
 }]
 ```
 
+#### sourceMessage
+The HTTP source message sent to the server. It should be full message from the message header to
+the request body.
+
 
 ### Styling
 `<raml-request-panel>` provides the following custom properties and mixins for styling:
@@ -265,6 +269,23 @@ Custom property | Description | Default
   <script>
   Polymer({
     is: 'raml-request-panel',
+
+    /**
+     * Fired when the response has been recorded and request, response, redirects and timings data
+     * are set.
+     *
+     * @event api-console-response-ready
+     *
+     * @param {Boolean} responseIsXhr
+     * @param {Response} response The response object
+     * @param {Error} responseError Error object if the response is errored
+     * @param {Request} request The request object.
+     * @param {Number} loadingTime Request loading time
+     * @param {Object} timings As defined in HAR 1.2 timnings object
+     * @param {Array<Object>} redirectTimings List of redirect timings
+     * @param {Array} redirects List of redirect Responses
+     * @param {String} sourceMessage Source HTTP message sent to the server.
+     */
     properties: {
       /**
        * A RAML node representing a method node in RAML definition.
@@ -357,7 +378,7 @@ Custom property | Description | Default
        * then this value will be set. It's the `timings` property from the HAR 1.2 spec.
        */
       timings: {
-        type: Number,
+        type: Object,
         notify: true,
         readOnly: true
       },
@@ -366,7 +387,7 @@ Custom property | Description | Default
        * then this value will be set. It's a list of `timings` property from the HAR 1.2 spec.
        */
       redirectTimings: {
-        type: Number,
+        type: Array,
         notify: true,
         readOnly: true
       },
@@ -374,7 +395,17 @@ Custom property | Description | Default
        * It will be set if the transport method can generate information about redirections.
        */
       redirects: {
-        type: Number,
+        type: Array,
+        notify: true,
+        readOnly: true
+      },
+      /**
+       * Http message sent to the server.
+       *
+       * This information should be available only in case of advanced HTTP transport.
+       */
+      sourceMessage: {
+        type: String,
         notify: true,
         readOnly: true
       },
@@ -550,6 +581,18 @@ Custom property | Description | Default
       this._setTimings(e.detail.timings);
       this._setRedirectTimings(e.detail.redirectTimings);
       this._setRedirects(e.detail.redirects);
+      this._setSourceMessage(e.detail.sourceMessage);
+      this.fire('api-console-response-ready', {
+        responseIsXhr: e.detail.isXhr,
+        response: e.detail.response,
+        responseError: e.detail.error,
+        request: e.detail.request,
+        loadingTime: e.detail.loadingTime,
+        timings: e.detail.timings,
+        redirectTimings: e.detail.redirectTimings,
+        redirects: e.detail.redirects,
+        sourceMessage: e.detail.sourceMessage
+      });
     },
 
     _clearRequestData: function() {
