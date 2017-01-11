@@ -99,7 +99,9 @@ Because this element fires back an event it has to be attached to the DOM.
       /**
        * Generated error object during the latest request
        */
-      error: Object
+      error: Object,
+      // Total request / response time
+      loadingTime: Number
     },
 
     /**
@@ -111,8 +113,10 @@ Because this element fires back an event it has to be attached to the DOM.
     execute: function(data) {
       this._setLoading(true);
       this.request = this._createRequest(data);
+      var requestStart = performance.now();
       fetch(this.request)
       .then(function(response) {
+        this.loadingTime = performance.now() - requestStart;
         this.response = response;
         if (!response.ok) {
           this.error = new Error('Resource is unavailable');
@@ -130,6 +134,7 @@ Because this element fires back an event it has to be attached to the DOM.
       var detail = {
         request: this.request,
         response: this.response,
+        loadingTime: this.loadingTime,
         isXhr: true
       };
       if (this.error) {

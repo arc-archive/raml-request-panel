@@ -337,15 +337,17 @@ Custom property | Description | Default
         notify: true,
         readOnly: true
       },
+      // Response full loading time.
+      loadingTime: {
+        type: Number,
+        notify: true,
+        readOnly: true
+      },
       /**
        * Current authorization settings from the `authorization-panel`
        * element.
        */
       authSettings: {
-        type: Object
-      },
-      // The RAML definition JSON object
-      raml: {
         type: Object
       },
       // Computed value if current method is secured
@@ -381,10 +383,6 @@ Custom property | Description | Default
       this.unlisten(window, 'api-console-response', '_responseHandler');
     },
 
-    // Computes if passed argumet is trully.
-    _computeHasData: function(raml) {
-      return !!raml;
-    },
     // Computes boolean value if the selected object (method) can carry a payload
     _computeIsPayloadRequest: function(record) {
       var base = record.base;
