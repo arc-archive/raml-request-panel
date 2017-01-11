@@ -162,6 +162,26 @@ String instead of the Headers object.
 The HTTP source message sent to the server. It should be full message from the message header to
 the request body.
 
+### Advanced event example
+```
+var event = new CustomEvent('api-console-response', {
+  cancelable: true,
+  bubbles: true,
+  composed: true,
+  detail: {
+    isXhr: true,
+    request: request,
+    response: response,
+    error: new Error('Dummy error'), // Has the response details so it shouldn't be set.
+    loadingTime: 125, // This is optional because timings is set
+    timings: { dns: 123, ... }
+    redirectTimings: [{ dns: 123, ... }],
+    redirects: [redirectResponse1, ...],
+    sourceMessage: 'HTTP/1.1 200 OK\n ....'
+  }
+});
+document.body.dispatchEvent(event);
+```
 
 ### Styling
 `<raml-request-panel>` provides the following custom properties and mixins for styling:
@@ -175,6 +195,9 @@ Custom property | Description | Default
 `--action-button` | Mixin applied ot the action button | `{}`
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
+
+You can set the `narrow` property so the element will be rendered in the mobile view.
+This property will be propagated to all sub-elements that uses this property to change layout.
 
 @group RAML Elements
 @element raml-request-panel
