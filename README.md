@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/advanced-rest-client/raml-request-panel.svg?branch=master)](https://travis-ci.org/advanced-rest-client/raml-request-panel)  
+[![Build Status](https://travis-ci.org/advanced-rest-client/raml-request-panel.svg?branch=stage)](https://travis-ci.org/advanced-rest-client/raml-request-panel)  
 
 # raml-request-panel
 

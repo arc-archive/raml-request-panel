@@ -1,3 +1,13 @@
+<a name="0.1.2"></a>
+## [0.1.2](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.1...v0.1.2) (2017-02-17)
+
+
+### Update
+
+* fixed loader. Now loader will show when executing the request ([a58a0fbbdcc09b346dca3ae3081b9a33bfb5d9a5](https://github.com/advanced-rest-client/raml-request-panel/commit/a58a0fbbdcc09b346dca3ae3081b9a33bfb5d9a5))
+
+
+
 <a name="0.1.1"></a>
 ## [0.1.1](https://github.com/advanced-rest-client/raml-request-panel/compare/0.0.16...v0.1.1) (2017-01-11)
 
