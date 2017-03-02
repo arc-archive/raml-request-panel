@@ -37,7 +37,7 @@
     "paper-progress": "PolymerElements/paper-progress#^1.0.11",
     "raml-body-editor-panel": "advanced-rest-client/raml-body-editor-panel#^0.1.1",
     "app-layout": "PolymerElements/app-layout#^0.10.6",
-    "authorization-panel": "advanced-rest-client/authorization-panel#^0.1.1",
+    "authorization-panel": "advanced-rest-client/authorization-panel#^0.5.1",
     "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.2",
     "fetch-polyfill": "advanced-rest-client/fetch-polyfill#^0.1.1",
     "paper-spinner": "PolymerElements/paper-spinner#^1.2.1"
@@ -65,5 +65,5 @@
     "test",
     "tasks"
   ],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
