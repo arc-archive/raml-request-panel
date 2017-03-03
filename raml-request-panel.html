@@ -264,6 +264,13 @@ This property will be propagated to all sub-elements that uses this property to 
     paper-spinner {
       margin-right: 8px;
     }
+
+    .panel-warning {
+      width: 16px;
+      height: 16px;
+      margin-left: 4px;
+      color: #FF5722;
+    }
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
@@ -271,15 +278,18 @@ This property will be propagated to all sub-elements that uses this property to 
         <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
+        <paper-tab hidden$="[[!authRequired]]">
+          Authorization
+          <iron-icon icon="arc:warning" class="panel-warning" hidden$="[[authValid]]" title="Fill up missing auth data"></iron-icon>
+        </paper-tab>
         <paper-tab>Parameters</paper-tab>
         <paper-tab>Headers</paper-tab>
-        <paper-tab hidden$="[[!authRequired]]">Authorization</paper-tab>
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
+        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" settings="[[authSettings]]" valid="{{authValid}}"></authorization-panel>
         <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
-        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" settings="[[authSettings]]"></authorization-panel>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
       </iron-pages>
       <div class="action-bar">
@@ -451,7 +461,19 @@ This property will be propagated to all sub-elements that uses this property to 
       // Selected by the user auth method (if any)
       authorizationMethod: String,
       // Current authorization settings.
-      authorizationSettings: Object
+      authorizationSettings: Object,
+      // If true then the authorization panel passed validation and auth data are set.
+      authValid: Boolean,
+      /**
+       * Computes if all data required for authorization are set.
+       * It check for the `authValid` property as a native form validation and in case of OAuth2
+       * for token information. If the token is not set then the auth is still invalid.
+       */
+      authNeeded: {
+        type: Boolean,
+        value: true,
+        computed: '_computeAuthNeeded(authValid,authorizationMethod,authorizationSettings)'
+      }
     },
 
     observers: [
@@ -460,9 +482,7 @@ This property will be propagated to all sub-elements that uses this property to 
     ],
 
     listeners: {
-      'authorization-enabled': '_authMethodEnabled',
-      'authorization-disabled': '_authMethodDisabled',
-      'auth-settings-changed': '_authSettingsChanged'
+      'authorization-settings-changed': '_authSettingsChanged'
     },
 
     attached: function() {
@@ -630,50 +650,117 @@ This property will be propagated to all sub-elements that uses this property to 
       this._setRedirects(undefined);
     },
 
-    _authMethodEnabled: function(e) {
+    _authSettingsChanged: function(e) {
       this.authorizationMethod = e.detail.type;
       this.authorizationSettings = e.detail.settings;
+      this.applyAuthData();
     },
 
-    _authMethodDisabled: function(e) {
-      if (this.authorizationMethod === e.detail.type) {
-        this.authorizationMethod = undefined;
-        this.authorizationSettings = undefined;
-      }
-    },
-
-    _authSettingsChanged: function(e) {
-      if (this.authorizationMethod && this.authorizationMethod !== e.detail.type) {
+    /**
+     * Applies current authorization settings to the request parameters.
+     * By default it will apply auth data to the Authorization header. If the `describedBy`
+     * property of the RAML data specify to set the data to query parameters then it will be
+     * applied to query params.
+     */
+    applyAuthData: function() {
+      if (!this.authRequired) {
         return;
       }
-      this.authorizationSettings = e.detail.settings;
-
-      var authHeader;
+      var type = this.authorizationMethod;
       var settings = this.authorizationSettings;
-      switch (this.authorizationMethod) {
+      if (!type || !settings) {
+        return;
+      }
+      var method = this._getSecuredMethod(type);
+      if (!method) {
+        console.warn('Security method for type %s not found.', type);
+        return;
+      }
+      var describedBy = method.describedBy;
+      if (!describedBy || describedBy.headers) {
+        var headers = describedBy ? describedBy.headers : undefined;
+        this._applyAuthHeaders(type, settings, headers);
+      } else if (describedBy.queryParameters) {
+        this._applyAuthQueryParameters(type, settings, describedBy.queryParameters);
+      } else {
+        console.warn('Unknown describedBy method.');
+      }
+    },
+    /**
+     * Gets selected security scheme for selected type.
+     *
+     * @param {String} type One of `basic`, `oauth1`, `oauth2`
+     * @return {Object} Corresponding security scheme for given type or undefined if not found.
+     */
+    _getSecuredMethod: function(type) {
+      var securityMethodsMapping = {
+        'OAuth 1.0': 'oauth1',
+        'OAuth 2.0': 'oauth2',
+        'Basic Authentication': 'basic',
+        'Digest Authentication': 'digest',
+        'Pass Through': 'passthrough'
+      };
+      var securedBy = this.method.securedBy;
+      for (var i = 0, len = securedBy.length; i < len; i++) {
+        if (securityMethodsMapping[securedBy[i].type] === type) {
+          return securedBy[i];
+        }
+      }
+    },
+    /**
+     * Applies authorization data as a header value.
+     * This function updated headers list.
+     *
+     * @param {String} type Selected authorization type.
+     * @param {Object} settings Authorization settings passed from the authorization panel.
+     * @param {Array} headers A headers array passed from the `describedBy` section of the RAML.
+     */
+    _applyAuthHeaders: function(type, settings, headers) {
+      var header = !!(headers && headers[0]) ? headers[0] : undefined;
+      var name = header ? header.name : 'Authorization';
+      var value = '';
+      switch (type) {
         case 'basic':
           if (settings.hash) {
-            authHeader = 'Basic ' + settings.hash;
+            value = 'Basic ' + settings.hash;
           }
           break;
         case 'oauth2':
           if (settings.tokenValue) {
-            authHeader = 'Bearer ' + settings.tokenValue;
+            value = 'Bearer ' + settings.tokenValue;
           }
           break;
       }
-      if (authHeader) {
-        if (/^authorization\s?:\s?.+$/im.test(this.headers)) {
-          this.headers = this.headers.
-            replace(/^(authorization)\s?:\s?.+$/im, '$1: ' + authHeader);
+      var re = new RegExp('^(' + name + ')\s?:\s?.+$', 'im');
+      if (re.test(this.headers)) {
+        this.headers = this.headers.replace(re, '$1: ' + value);
+      } else {
+        if (this.headers) {
+          this.headers += '\n' + name + ': ' + value;
         } else {
-          if (this.headers) {
-            this.headers += '\nAuthorization: ' + authHeader;
-          } else {
-            this.headers = 'Authorization: ' + authHeader;
-          }
+          this.headers = name + ': ' + value;
         }
       }
+    },
+
+    _applyAuthQueryParameters: function(type, settings, queryParams) {
+      if (!queryParams || !queryParams[0]) {
+        return;
+      }
+      // TODO: apply params to the corrsponding `method.queryParameters` item.
+      console.warn('Implement me!', type, settings, queryParams);
+    },
+
+    _computeAuthNeeded: function(authValid, authorizationMethod, authorizationSettings) {
+      if (!authValid) {
+        return true;
+      }
+      if (authorizationMethod === 'oauth2') {
+        if (!authorizationSettings.tokenValue) {
+          return true;
+        }
+      }
+      return false;
     }
   });
   </script>
