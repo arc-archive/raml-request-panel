@@ -1,3 +1,13 @@
+<a name="0.1.5"></a>
+## [0.1.5](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.3...v0.1.5) (2017-03-03)
+
+
+### Update
+
+* Added auth panel validation check. Updated auth data apply function ([dc0d21af54b3ee1008b846c7645dd029850e89c1](https://github.com/advanced-rest-client/raml-request-panel/commit/dc0d21af54b3ee1008b846c7645dd029850e89c1))
+
+
+
 <a name="0.1.4"></a>
 ## [0.1.4](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.3...v0.1.4) (2017-03-03)
 
