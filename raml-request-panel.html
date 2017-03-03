@@ -238,8 +238,8 @@ This property will be propagated to all sub-elements that uses this property to 
     }
 
     .action-button {
-      background-color: var(--primary-color);
-      color: var(--primary-action-color, #fff);
+      background-color: var(--accent-color);
+      color: #fff;
       @apply(--action-button);
     }
 
@@ -271,6 +271,10 @@ This property will be propagated to all sub-elements that uses this property to 
       margin-left: 4px;
       color: #FF5722;
     }
+
+    .auth-required-info {
+      color: rgba(0, 0, 0, 0.54);
+    }
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
@@ -294,7 +298,11 @@ This property will be propagated to all sub-elements that uses this property to 
       </iron-pages>
       <div class="action-bar">
         <paper-spinner alt="Loading contacts list" active="[[loadingRequest]]"></paper-spinner>
-        <paper-button class="action-button" on-tap="execute">Run</paper-button>
+        <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]">Run</paper-button>
+        <div>
+          <span class="auth-required-info">This endpoint requires authorization.</span>
+          <paper-button class="action-button" on-tap="authAndExecute" hidden$="[[!authNeeded]]">authorize and run</paper-button>
+        </div>
       </div>
     </div>
     <oauth2-authorization></oauth2-authorization>
