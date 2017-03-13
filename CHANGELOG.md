@@ -1,3 +1,17 @@
+<a name="0.1.6"></a>
+## [0.1.6](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.5...v0.1.6) (2017-03-13)
+
+
+### New
+
+* Added an authorization dialog when the user do not authenticate the call before running it ([5d08de77861a1f10c39a532f4c0e3d8d2ef995db](https://github.com/advanced-rest-client/raml-request-panel/commit/5d08de77861a1f10c39a532f4c0e3d8d2ef995db))
+
+### Update
+
+* Updated depenencies versions. Updated main button css definition. Now main button will use accent color as a background color ([8d853c2004f8f6fe13dc1789ae9e2e08647e24c8](https://github.com/advanced-rest-client/raml-request-panel/commit/8d853c2004f8f6fe13dc1789ae9e2e08647e24c8))
+
+
+
 <a name="0.1.5"></a>
 ## [0.1.5](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.3...v0.1.5) (2017-03-03)
 
