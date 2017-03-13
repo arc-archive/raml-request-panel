@@ -30,8 +30,10 @@ the License.
 <link rel="import" href="../oauth-authorization/oauth2-authorization.html">
 <link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
 <link rel="import" href="../fetch-polyfill/fetch-polyfill.html">
+<link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
 <link rel="import" href="raml-request-panel-simple-xhr.html">
-
 <!--
 The request panel view for the request defined as a RAML method.
 It is a main view element for the API console to display the request panel related to the RAML
@@ -204,7 +206,7 @@ This property will be propagated to all sub-elements that uses this property to 
 <dom-module id="raml-request-panel">
   <template>
     <style>
-    :host {
+     :host {
       display: block;
       @apply(--raml-request-panel);
     }
@@ -225,7 +227,7 @@ This property will be propagated to all sub-elements that uses this property to 
       display: none !important;
     }
 
-    iron-pages> * {
+    iron-pages>* {
       border: 1px var(--raml-request-panel-panel-border-color, transparent) solid;
       min-height: 120px;
     }
@@ -252,12 +254,12 @@ This property will be propagated to all sub-elements that uses this property to 
       @apply(--layout-flex);
     }
 
-    :host([narrow]) .content {
+     :host([narrow]) .content {
       @apply(--layout-vertical);
       @apply(--raml-request-panel-container-narrow);
     }
 
-    :host([narrow]) raml-request-url-editor {
+     :host([narrow]) raml-request-url-editor {
       width: auto;
     }
 
@@ -291,22 +293,33 @@ This property will be propagated to all sub-elements that uses this property to 
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
-        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" settings="[[authSettings]]" valid="{{authValid}}"></authorization-panel>
+        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" valid="{{authValid}}"></authorization-panel>
         <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
       </iron-pages>
       <div class="action-bar">
         <paper-spinner alt="Loading contacts list" active="[[loadingRequest]]"></paper-spinner>
-        <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]">Run</paper-button>
-        <div>
+        <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]">Send</paper-button>
+        <div hidden$="[[!authNeeded]]">
           <span class="auth-required-info">This endpoint requires authorization.</span>
-          <paper-button class="action-button" on-tap="authAndExecute" hidden$="[[!authNeeded]]">authorize and run</paper-button>
+          <paper-button class="action-button" on-tap="authAndExecute">authorize and send</paper-button>
         </div>
       </div>
     </div>
+    <paper-dialog id="authDialog">
+      <h2>Authorization</h2>
+      <paper-dialog-scrollable>
+        <authorization-panel secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" valid="{{authValid}}"></authorization-panel>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss autofocus>Cancel</paper-button>
+        <paper-button dialog-confirm on-tap="_onAuthAndSend">Authorize</paper-button>
+      </div>
+    </paper-dialog>
     <oauth2-authorization></oauth2-authorization>
     <raml-request-panel-simple-xhr id="xhr"></raml-request-panel-simple-xhr>
+    <paper-toast text="Authorization is required for this endpoint." id="authRequired"></paper-toast>
   </template>
   <script>
   Polymer({
@@ -451,13 +464,6 @@ This property will be propagated to all sub-elements that uses this property to 
         notify: true,
         readOnly: true
       },
-      /**
-       * Current authorization settings from the `authorization-panel`
-       * element.
-       */
-      authSettings: {
-        type: Object
-      },
       // Computed value if current method is secured
       authRequired: {
         type: Boolean,
@@ -561,6 +567,48 @@ This property will be propagated to all sub-elements that uses this property to 
       }
     },
     /**
+     * Performs an authorization by bringing up the authorization
+     * form in a popup and after successful authorization executes the
+     * request.
+     */
+    authAndExecute: function() {
+      this.$.authDialog.opened = true;
+    },
+    /**
+     * Handler for "authorize" button click in the authorization dialog.
+     * If nescessary it will signal OAuth token request and wait until
+     * the token is ready before executing the request.
+     */
+    _onAuthAndSend: function() {
+      if (!this.authValid) {
+        this.$.authRequired.opened = true;
+        return;
+      }
+      var callSend = false;
+      switch (this.authorizationMethod) {
+        case 'oauth2':
+          if (!this.authorizationSettings || !this.authorizationSettings.tokenValue) {
+            this.fire('oauth2-token-requested', this.authorizationSettings);
+          } else {
+            callSend = true;
+          }
+          break;
+        case 'basic':
+          if (!this.authorizationSettings || !this.authorizationSettings.hash) {
+            this.$.authRequired.opened = true;
+            return;
+          } else {
+            callSend = true;
+          }
+          break;
+      }
+      if (callSend) {
+        this.execute();
+      } else {
+        this.__pendingRequest = true;
+      }
+    },
+    /**
      * Returns an object with the request properties.
      * The object contains:
      * - method (String)
@@ -591,8 +639,12 @@ This property will be propagated to all sub-elements that uses this property to 
           var authHeader;
           var settings = this.authorizationSettings;
           switch (this.authorizationMethod) {
-            case 'basic': authHeader = 'Basic ' + settings.hash; break;
-            case 'oauth2': authHeader = 'Bearer ' + settings.tokenValue; break;
+            case 'basic':
+              authHeader = 'Basic ' + settings.hash;
+              break;
+            case 'oauth2':
+              authHeader = 'Bearer ' + settings.tokenValue;
+              break;
             case 'ntlm':
               // This must be set dicectly on a transport implementation
               result.auth = {
@@ -662,6 +714,10 @@ This property will be propagated to all sub-elements that uses this property to 
       this.authorizationMethod = e.detail.type;
       this.authorizationSettings = e.detail.settings;
       this.applyAuthData();
+      if (this.__pendingRequest) {
+        this.__pendingRequest = false;
+        this.execute();
+      }
     },
 
     /**
