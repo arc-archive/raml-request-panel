@@ -320,6 +320,7 @@ This property will be propagated to all sub-elements that uses this property to 
     <oauth2-authorization></oauth2-authorization>
     <raml-request-panel-simple-xhr id="xhr"></raml-request-panel-simple-xhr>
     <paper-toast text="Authorization is required for this endpoint." id="authRequired"></paper-toast>
+    <paper-toast text="Fill in the authorization form first." id="authFormError"></paper-toast>
   </template>
   <script>
   Polymer({
@@ -572,6 +573,10 @@ This property will be propagated to all sub-elements that uses this property to 
      * request.
      */
     authAndExecute: function() {
+      if (this.selectedTab === 0) {
+        this.$.authFormError.opened = true;
+        return;
+      }
       this.$.authDialog.opened = true;
     },
     /**
