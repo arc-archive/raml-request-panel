@@ -1,3 +1,19 @@
+<a name="0.1.11"></a>
+## [0.1.11](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.9...v0.1.11) (2017-03-28)
+
+
+### Update
+
+* The Auth popup winll not show if the selected panel is the authorization panel ([2337b427f3d1857e9c42456a833fd648b84b6f32](https://github.com/advanced-rest-client/raml-request-panel/commit/2337b427f3d1857e9c42456a833fd648b84b6f32))
+
+
+
+<a name="0.1.10"></a>
+## [0.1.10](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.9...v0.1.10) (2017-03-24)
+
+
+
+
 <a name="0.1.9"></a>
 ## [0.1.9](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.8...v0.1.9) (2017-03-14)
 
