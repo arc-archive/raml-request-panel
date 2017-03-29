@@ -42,28 +42,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       var element;
       var raml;
-      setup(function(done) {
+      var method;
+
+      suiteSetup(function(done) {
         var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-        element = fixture('basic');
         var parser = fixture('parser');
         parser.loadApi(baseUrl + 'test.raml')
         .then(function() {
           raml = parser.get('latestJson.specification');
-          element.method = parser.get('latestJson.specification.resources.0.methods.0');
-          TestHelpers.forceXIfStamp(element);
+          method = raml.resources[0].methods[0];
           done();
         })
         .catch(function(e) {
-          done(e);
+          done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
         });
       });
 
+      setup(function() {
+        element = fixture('basic');
+        element.method = method;
+        TestHelpers.forceXIfStamp(element);
+      });
+
       test('isPayloadRequest is false', function() {
-        assert.isFalse(element.isPayloadRequest, 'isPayloadRequest is false');
+        assert.isFalse(element.isPayloadRequest);
       });
 
       test('authRequired is false', function() {
-        assert.isFalse(element.authRequired, 'authRequired is false');
+        assert.isFalse(element.authRequired);
       });
 
       test('Should serialize request', function() {
@@ -80,7 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var spy = sinon.stub();
         element.addEventListener('api-console-request', spy);
         element.execute();
-        assert.isTrue(spy.calledOnce, 'variables-model-query was not fired');
+        assert.isTrue(spy.calledOnce);
       });
 
       test('Should `api-console-request` have the request details', function(done) {
@@ -92,22 +98,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             payload: ''
           };
           assert.deepEqual(e.detail, request);
-          done();
-        });
-        element.execute();
-      });
-
-      test('Should `api-console-response-ready` be fired with response details', function(done) {
-        element.addEventListener('api-console-response-ready', function(e) {
-          assert.isTrue(e.detail.isXhr);
-          assert.instanceOf(e.detail.response, Response, 'chai is an instance of tea');
-          assert.instanceOf(e.detail.responseError, Error);
-          assert.instanceOf(e.detail.request, Request);
-          assert.isNumber(e.detail.loadingTime);
-          assert.isUndefined(e.detail.timings);
-          assert.isUndefined(e.detail.redirectTimings);
-          assert.isUndefined(e.detail.redirects);
-          assert.isUndefined(e.detail.sourceMessage);
+          e.preventDefault();
           done();
         });
         element.execute();

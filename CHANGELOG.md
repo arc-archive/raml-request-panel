@@ -1,3 +1,25 @@
+<a name="0.1.17"></a>
+## [0.1.17](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.15...v0.1.17) (2017-03-29)
+
+
+### Fix
+
+* Fixes #1 - The error object isn't cleared when making a request ([b5a5a016539022833fea58832b919039323dd0e1](https://github.com/advanced-rest-client/raml-request-panel/commit/b5a5a016539022833fea58832b919039323dd0e1)), closes [#1](https://github.com/advanced-rest-client/raml-request-panel/issues/1)
+
+### Update
+
+* Removed headers override on request execution time - this has been moved to authorization panel and event system ([1e4abb588ae3d073ba7bf2412bfed3d4b35bbde2](https://github.com/advanced-rest-client/raml-request-panel/commit/1e4abb588ae3d073ba7bf2412bfed3d4b35bbde2))
+* Updated tests ([682bb5980a2132d1d09766a75f92d8893198532f](https://github.com/advanced-rest-client/raml-request-panel/commit/682bb5980a2132d1d09766a75f92d8893198532f))
+* Updated tests ([cbac865537fbd296c2ca83c1555965cbd3878215](https://github.com/advanced-rest-client/raml-request-panel/commit/cbac865537fbd296c2ca83c1555965cbd3878215))
+
+
+
+<a name="0.1.16"></a>
+## [0.1.16](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.15...v0.1.16) (2017-03-29)
+
+
+
+
 <a name="0.1.15"></a>
 ## [0.1.15](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.14...v0.1.15) (2017-03-28)
 

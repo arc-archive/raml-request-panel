@@ -112,6 +112,8 @@ Because this element fires back an event it has to be attached to the DOM.
      */
     execute: function(data) {
       this._setLoading(true);
+      this.error = undefined;
+      this.response = undefined;
       this.request = this._createRequest(data);
       var requestStart = performance.now();
       fetch(this.request)
