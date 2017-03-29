@@ -98,22 +98,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             payload: ''
           };
           assert.deepEqual(e.detail, request);
-          done();
-        });
-        element.execute();
-      });
-
-      test('Should `api-console-response-ready` be fired with response details', function(done) {
-        element.addEventListener('api-console-response-ready', function(e) {
-          assert.isTrue(e.detail.isXhr);
-          assert.instanceOf(e.detail.response, Response, 'chai is an instance of tea');
-          assert.instanceOf(e.detail.responseError, Error);
-          assert.instanceOf(e.detail.request, Request);
-          assert.isNumber(e.detail.loadingTime);
-          assert.isUndefined(e.detail.timings);
-          assert.isUndefined(e.detail.redirectTimings);
-          assert.isUndefined(e.detail.redirects);
-          assert.isUndefined(e.detail.sourceMessage);
+          e.preventDefault();
           done();
         });
         element.execute();
