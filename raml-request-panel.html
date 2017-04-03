@@ -342,6 +342,17 @@ This property will be propagated to all sub-elements that uses this property to 
      * @param {Array} redirects List of redirect Responses
      * @param {String} sourceMessage Source HTTP message sent to the server.
      */
+    /**
+     * Event fired when the console want to make a request to an endpoint.
+     * If the hosting application can handle the event and will make a request on behalf of the
+     * console, this event must be cancelled. Otherwise internal XHR request will be made.
+     *
+     * @event api-console-request
+     * @param {String} method The HTTP method name
+     * @param {String} url Endpoint's URL
+     * @param {String} headers A HTTP headers string (as defined in the spec)
+     * @param {String} payload A message body (encoded if necessary).
+     */
     properties: {
       /**
        * A RAML node representing a method node in RAML definition.
