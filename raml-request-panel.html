@@ -274,9 +274,9 @@ This property will be propagated to all sub-elements that uses this property to 
       color: #FF5722;
     }
 
-    .auth-required-info {
+    /*.auth-required-info {
       color: rgba(0, 0, 0, 0.54);
-    }
+    }*/
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
@@ -302,7 +302,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <paper-spinner alt="Loading contacts list" active="[[loadingRequest]]"></paper-spinner>
         <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]">Send</paper-button>
         <div hidden$="[[!authNeeded]]">
-          <span class="auth-required-info">This endpoint requires authorization.</span>
+          <!-- <span class="auth-required-info">This endpoint requires authorization.</span> -->
           <paper-button class="action-button" on-tap="authAndExecute">authorize and send</paper-button>
         </div>
       </div>
