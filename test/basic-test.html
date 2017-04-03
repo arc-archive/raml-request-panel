@@ -20,13 +20,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <link rel="import" href="../../fetch-polyfill/fetch-polyfill.html">
     <link rel="import" href="../../raml-js-parser/raml-js-parser.html">
+    <link rel="import" href="../../raml-json-enhance/raml-json-enhance.html">
     <link rel="import" href="../raml-request-panel.html">
   </head>
   <body>
 
     <test-fixture id="parser">
       <template>
-        <raml-js-parser normalize-raml></raml-js-parser>
+        <raml-js-parser json></raml-js-parser>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="enhancer">
+      <template>
+        <raml-json-enhance></raml-json-enhance>
       </template>
     </test-fixture>
 
@@ -47,11 +54,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       suiteSetup(function(done) {
         var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
         var parser = fixture('parser');
-        parser.loadApi(baseUrl + 'test.raml')
-        .then(function() {
-          raml = parser.get('latestJson.specification');
+        var enhancer = fixture('enhancer');
+        enhancer.addEventListener('raml-json-enhance-ready', function(e) {
+          raml = e.detail.json;
           method = raml.resources[0].methods[0];
           done();
+        });
+        parser.loadApi(baseUrl + 'test.raml')
+        .then(function(data) {
+          enhancer.json = data.json.specification;
         })
         .catch(function(e) {
           done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
