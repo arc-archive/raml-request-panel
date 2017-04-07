@@ -171,6 +171,10 @@ This property will be propagated to all sub-elements that uses this property to 
 ### Events
 | Name | Description | Params |
 | --- | --- | --- |
+| api-console-request | Event fired when the console want to make a request to an endpoint. If the hosting application can handle the event and will make a request on behalf of the console, this event must be cancelled. Otherwise internal XHR request will be made. | method **String** - The HTTP method name |
+url **String** - Endpoint's URL |
+headers **String** - A HTTP headers string (as defined in the spec) |
+payload **String** - A message body (encoded if necessary). |
 | api-console-response-ready | Fired when the response has been recorded and request, response, redirects and timings data are set. | isXhr **Boolean** - True if the transport method is a basic transport. |
 response **Response** - The response object |
 responseError **Error** - Error object if the response is errored |

@@ -1,3 +1,20 @@
+<a name="0.1.19"></a>
+## [0.1.19](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.18...v0.1.19) (2017-04-07)
+
+
+### Docs
+
+* Added documentation for request event ([d43b550d49857f66b3e2a36f21dcee90a9e33d6c](https://github.com/advanced-rest-client/raml-request-panel/commit/d43b550d49857f66b3e2a36f21dcee90a9e33d6c))
+
+### Update
+
+* removed the label for the authorization buyyon ([f0d940e1c7a862d63bb8e73c5961097ddc20811a](https://github.com/advanced-rest-client/raml-request-panel/commit/f0d940e1c7a862d63bb8e73c5961097ddc20811a))
+* the authNeeded property is now false by default ([70bea33d67b20c7b22899415ef64a26878978cb4](https://github.com/advanced-rest-client/raml-request-panel/commit/70bea33d67b20c7b22899415ef64a26878978cb4))
+* updated raml-js-parser version in the bower file ([d822ac6e2ebd2ef95b5b116ad3ae4f117436f943](https://github.com/advanced-rest-client/raml-request-panel/commit/d822ac6e2ebd2ef95b5b116ad3ae4f117436f943))
+* Updated test suite for new parser ([4341da878207c387ce65d5582a0e6e472444635a](https://github.com/advanced-rest-client/raml-request-panel/commit/4341da878207c387ce65d5582a0e6e472444635a))
+
+
+
 <a name="0.1.18"></a>
 ## [0.1.18](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.17...v0.1.18) (2017-03-29)
 
