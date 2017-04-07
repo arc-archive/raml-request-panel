@@ -274,9 +274,9 @@ This property will be propagated to all sub-elements that uses this property to 
       color: #FF5722;
     }
 
-    .auth-required-info {
+    /*.auth-required-info {
       color: rgba(0, 0, 0, 0.54);
-    }
+    }*/
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
@@ -302,7 +302,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <paper-spinner alt="Loading contacts list" active="[[loadingRequest]]"></paper-spinner>
         <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]">Send</paper-button>
         <div hidden$="[[!authNeeded]]">
-          <span class="auth-required-info">This endpoint requires authorization.</span>
+          <!-- <span class="auth-required-info">This endpoint requires authorization.</span> -->
           <paper-button class="action-button" on-tap="authAndExecute">authorize and send</paper-button>
         </div>
       </div>
@@ -341,6 +341,17 @@ This property will be propagated to all sub-elements that uses this property to 
      * @param {Array<Object>} redirectTimings List of redirect timings
      * @param {Array} redirects List of redirect Responses
      * @param {String} sourceMessage Source HTTP message sent to the server.
+     */
+    /**
+     * Event fired when the console want to make a request to an endpoint.
+     * If the hosting application can handle the event and will make a request on behalf of the
+     * console, this event must be cancelled. Otherwise internal XHR request will be made.
+     *
+     * @event api-console-request
+     * @param {String} method The HTTP method name
+     * @param {String} url Endpoint's URL
+     * @param {String} headers A HTTP headers string (as defined in the spec)
+     * @param {String} payload A message body (encoded if necessary).
      */
     properties: {
       /**
@@ -482,7 +493,7 @@ This property will be propagated to all sub-elements that uses this property to 
        */
       authNeeded: {
         type: Boolean,
-        value: true,
+        value: false,
         computed: '_computeAuthNeeded(authValid,authorizationMethod,authorizationSettings)'
       }
     },
