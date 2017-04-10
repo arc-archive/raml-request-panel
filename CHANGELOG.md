@@ -1,3 +1,13 @@
+<a name="0.1.20"></a>
+## [0.1.20](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.19...v0.1.20) (2017-04-10)
+
+
+### Update
+
+* Updated demo page - added API Console extension communication element ([4176cfd1544d7a0db9bec0358a55d3b1f7a12dc7](https://github.com/advanced-rest-client/raml-request-panel/commit/4176cfd1544d7a0db9bec0358a55d3b1f7a12dc7))
+
+
+
 <a name="0.1.19"></a>
 ## [0.1.19](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.18...v0.1.19) (2017-04-07)
 
