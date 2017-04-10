@@ -59,7 +59,8 @@
     "paper-item": "polymerelements/paper-item#^1.2.1",
     "paper-dropdown-menu": "polymerelements/paper-dropdown-menu#^1.4.3",
     "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.5",
-    "raml-js-parser": "advanced-rest-client/raml-js-parser#^2.0.0"
+    "raml-js-parser": "advanced-rest-client/raml-js-parser#^2.0.0",
+    "api-console-ext-comm": "advanced-rest-client/api-console-ext-comm#^0.1.1"
   },
   "ignore": [
     "**/.*",
@@ -69,5 +70,5 @@
     "test",
     "tasks"
   ],
-  "version": "0.1.19"
+  "version": "0.1.20"
 }
