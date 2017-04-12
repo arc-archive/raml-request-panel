@@ -536,14 +536,16 @@ This property will be propagated to all sub-elements that uses this property to 
     },
 
     _authRequiredChanged: function(required) {
+      if (required && this.selectedTab === 2) {
+        this.selectedTab = 0;
+      } else if (!required && this.selectedTab === 0) {
+        this.selectedTab = 1;
+      }
       var tabs = this.$$('paper-tabs');
       if (!tabs) {
         return;
       }
       tabs.notifyResize();
-      if (required && tabs.selected === 2) {
-        tabs.selected = 0;
-      }
     },
     /**
      * Execute the request with current settings.
