@@ -1,3 +1,19 @@
+<a name="0.1.28"></a>
+## [0.1.28](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.26...v0.1.28) (2017-04-12)
+
+
+### Fix
+
+* Fixed an issue when changing tabs number the tab selection was pointed to non existing tab ([b2b5c8e6a75778d557103062ac51132b368e4494](https://github.com/advanced-rest-client/raml-request-panel/commit/b2b5c8e6a75778d557103062ac51132b368e4494))
+
+
+
+<a name="0.1.27"></a>
+## [0.1.27](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.26...v0.1.27) (2017-04-12)
+
+
+
+
 <a name="0.1.26"></a>
 ## [0.1.26](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.25...v0.1.26) (2017-04-12)
 

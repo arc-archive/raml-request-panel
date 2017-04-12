@@ -516,7 +516,8 @@ This property will be propagated to all sub-elements that uses this property to 
 
     observers: [
       '_isPayloadRequestChanged(isPayloadRequest)',
-      '_authRequiredChanged(authRequired)'
+      '_authRequiredChanged(authRequired)',
+      '_selectedTabChanged(selectedTab)'
     ],
 
     listeners: {
@@ -541,14 +542,18 @@ This property will be propagated to all sub-elements that uses this property to 
     },
 
     _isPayloadRequestChanged: function(required) {
+      if (!required && this.selectedTab === 3) {
+        if (this.authRequired) {
+          this.selectedTab = 0;
+        } else {
+          this.selectedTab = 1;
+        }
+      }
       var tabs = this.$$('paper-tabs');
       if (!tabs) {
         return;
       }
       tabs.notifyResize();
-      if (required && tabs.selected === 3) {
-        tabs.selected = 0;
-      }
     },
 
     _authRequiredChanged: function(required) {
@@ -719,6 +724,14 @@ This property will be propagated to all sub-elements that uses this property to 
         }
       }
       return false;
+    },
+    /**
+     * Updates the body editor if selected.
+     */
+    _selectedTabChanged: function(selectedTab) {
+      if (selectedTab === 3) {
+        this.$$('raml-body-editor-panel').notifyResize();
+      }
     }
   });
   </script>
