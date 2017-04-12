@@ -192,9 +192,11 @@ Custom property | Description | Default
 `--raml-request-panel-panel-border-color` | Border color of each block in the tabs | `rgba(0, 0, 0, 0.24)`
 `--raml-request-panel-container` | Mixin applied to the main content container | `{}`
 `--raml-request-panel-container-narrow` | Mixin applied to the main content container when layout is narrow | `{}`
-`--action-button` | Mixin applied ot the action button | `{}`
+`--action-button` | Mixin applied to the action button | `{}`
+`--action-button-disabled` | Mixin applied to disbaled action button | `{}`
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
+`--action-accent-button-disabled-color` | Color of disabled action button | ``
 
 You can set the `narrow` property so the element will be rendered in the mobile view.
 This property will be propagated to all sub-elements that uses this property to change layout.
@@ -245,6 +247,12 @@ This property will be propagated to all sub-elements that uses this property to 
       @apply(--action-button);
     }
 
+    .action-button[disabled] {
+      background-color: var(--action-accent-button-disabled-color);
+      color: #fff;
+      @apply(--action-button-disabled);
+    }
+
     .url-editor {
       @apply(--layout-horizontal);
       @apply(--layout-center);
@@ -254,12 +262,12 @@ This property will be propagated to all sub-elements that uses this property to 
       @apply(--layout-flex);
     }
 
-     :host([narrow]) .content {
+    :host([narrow]) .content {
       @apply(--layout-vertical);
       @apply(--raml-request-panel-container-narrow);
     }
 
-     :host([narrow]) raml-request-url-editor {
+    :host([narrow]) raml-request-url-editor {
       width: auto;
     }
 
@@ -281,7 +289,7 @@ This property will be propagated to all sub-elements that uses this property to 
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
       <div class="url-editor">
-        <raml-request-url-editor uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-url-editor>
+        <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
         <paper-tab hidden$="[[!authRequired]]">
@@ -300,10 +308,11 @@ This property will be propagated to all sub-elements that uses this property to 
       </iron-pages>
       <div class="action-bar">
         <paper-spinner alt="Loading contacts list" active="[[loadingRequest]]"></paper-spinner>
-        <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]">Send</paper-button>
+        <span class="url-invalid-info" hidden$="[[!urlInvalid]]">Request URL is invalid.</span>
+        <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]" disabled="[[urlInvalid]]">Send</paper-button>
         <div hidden$="[[!authNeeded]]">
           <!-- <span class="auth-required-info">This endpoint requires authorization.</span> -->
-          <paper-button class="action-button" on-tap="authAndExecute">authorize and send</paper-button>
+          <paper-button class="action-button" on-tap="authAndExecute" disabled="[[urlInvalid]]">authorize and send</paper-button>
         </div>
       </div>
     </div>
@@ -495,6 +504,13 @@ This property will be propagated to all sub-elements that uses this property to 
         type: Boolean,
         value: false,
         computed: '_computeAuthNeeded(authValid,authorizationMethod,authorizationSettings)'
+      },
+      /**
+       * Computed value when the URL change.
+       * If not valid form submission won't be possible.
+       */
+      urlInvalid: {
+        type: Boolean
       }
     },
 
