@@ -44,7 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </test-fixture>
 
     <script>
-    /* global suite, test, fixture, assert, TestHelpers, sinon */
+    /* global fixture, assert, TestHelpers, sinon, forceXIfStamp */
     suite('basic', function() {
 
       var element;
@@ -113,6 +113,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           done();
         });
         element.execute();
+      });
+
+      test('Send request button is disabled when url is invalid', function() {
+        element.url = '/test';
+        forceXIfStamp(element);
+        assert.isTrue(element.urlInvalid);
+        var button = Polymer.dom(element.root).querySelector('.action-button');
+        assert.isTrue(button.disabled);
       });
     });
     </script>
