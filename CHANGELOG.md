@@ -1,3 +1,13 @@
+<a name="0.1.22"></a>
+## [0.1.22](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.20...v0.1.22) (2017-04-12)
+
+
+### Update
+
+* Updated reaction on tabs list change. Now it will select the parameters view if the authorization is not enabled ([58aff355ef5a421c547ebbaf80ed6781ca533eb3](https://github.com/advanced-rest-client/raml-request-panel/commit/58aff355ef5a421c547ebbaf80ed6781ca533eb3))
+
+
+
 <a name="0.1.21"></a>
 ## [0.1.21](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.20...v0.1.21) (2017-04-12)
 
