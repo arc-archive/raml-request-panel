@@ -1,3 +1,19 @@
+<a name="0.1.25"></a>
+## [0.1.25](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.23...v0.1.25) (2017-04-12)
+
+
+### Update
+
+* The request panel now disable send button if the URL is invalid. ([05816c3f45016bdf5ccb38a69268f78e6ba0e5d9](https://github.com/advanced-rest-client/raml-request-panel/commit/05816c3f45016bdf5ccb38a69268f78e6ba0e5d9))
+
+
+
+<a name="0.1.24"></a>
+## [0.1.24](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.23...v0.1.24) (2017-04-12)
+
+
+
+
 <a name="0.1.23"></a>
 ## [0.1.23](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.22...v0.1.23) (2017-04-12)
 
