@@ -160,6 +160,7 @@ Custom property | Description | Default
 `--raml-request-panel-container` | Mixin applied to the main content container | `{}`
 `--raml-request-panel-container-narrow` | Mixin applied to the main content container when layout is narrow | `{}`
 `--action-button` | Mixin applied to the action button | `{}`
+`--action-button-hover` | Mixin applied to :hover state for the action button | `{}`
 `--action-button-disabled` | Mixin applied to disbaled action button | `{}`
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
