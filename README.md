@@ -165,6 +165,10 @@ Custom property | Description | Default
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
 `--action-accent-button-disabled-color` | Color of disabled action button | ``
+`--primary-button-background-color` | Background color of the primary button. |`--accent-color`
+`--primary-button-color` | Font color of the primary button | `#fff`
+`--primary-button-hover-background-color` | Background color of the primary button when hovered. |`--accent-color`
+`--primary-button-hover-color` | Font color of the primary button when hovered. | `#fff`
 
 You can set the `narrow` property so the element will be rendered in the mobile view.
 This property will be propagated to all sub-elements that uses this property to change layout.

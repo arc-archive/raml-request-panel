@@ -1,3 +1,13 @@
+<a name="0.1.34"></a>
+## [0.1.34](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.33...v0.1.34) (2017-04-20)
+
+
+### Update
+
+* Updated styles and labels in buttons ([ab27cdb1b0d0165b3ec1e8b1412c0a3abdf6cebd](https://github.com/advanced-rest-client/raml-request-panel/commit/ab27cdb1b0d0165b3ec1e8b1412c0a3abdf6cebd))
+
+
+
 <a name="0.1.33"></a>
 ## [0.1.33](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.32...v0.1.33) (2017-04-19)
 
