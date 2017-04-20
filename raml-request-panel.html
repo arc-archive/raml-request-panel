@@ -198,6 +198,10 @@ Custom property | Description | Default
 `--primary-color` | background-color of the main action button | `--primary-color`
 `--primary-action-color` | Color of the main action button | `--primary-action-color`
 `--action-accent-button-disabled-color` | Color of disabled action button | ``
+`--primary-button-background-color` | Background color of the primary button. |`--accent-color`
+`--primary-button-color` | Font color of the primary button | `#fff`
+`--primary-button-hover-background-color` | Background color of the primary button when hovered. |`--accent-color`
+`--primary-button-hover-color` | Font color of the primary button when hovered. | `#fff`
 
 You can set the `narrow` property so the element will be rendered in the mobile view.
 This property will be propagated to all sub-elements that uses this property to change layout.
@@ -243,10 +247,14 @@ This property will be propagated to all sub-elements that uses this property to 
     }
 
     .action-button {
+      background-color: var(--primary-button-background-color, --accent-color);
+      color: var(--primary-button-color, #fff);
       @apply(--action-button);
     }
 
     .action-button:hover {
+      background-color: var(--primary-button-hover-background-color, --accent-color);
+      color: var(--primary-button-hover-color, #fff);
       @apply(--action-button-hover);
     }
 
@@ -314,8 +322,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <span class="url-invalid-info" hidden$="[[!urlInvalid]]">Request URL is invalid.</span>
         <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]" disabled="[[urlInvalid]]">Send</paper-button>
         <div hidden$="[[!authNeeded]]">
-          <!-- <span class="auth-required-info">This endpoint requires authorization.</span> -->
-          <paper-button class="action-button" on-tap="authAndExecute" disabled="[[urlInvalid]]">authorize and send</paper-button>
+          <paper-button class="action-button" on-tap="authAndExecute" disabled="[[urlInvalid]]">Authorize and send</paper-button>
         </div>
       </div>
     </div>
@@ -331,8 +338,8 @@ This property will be propagated to all sub-elements that uses this property to 
     </paper-dialog>
     <oauth2-authorization></oauth2-authorization>
     <raml-request-panel-simple-xhr id="xhr"></raml-request-panel-simple-xhr>
-    <paper-toast text="Authorization is required for this endpoint." id="authRequired"></paper-toast>
-    <paper-toast text="Fill in the authorization form first." id="authFormError"></paper-toast>
+    <paper-toast text="Authorization is required for this endpoint" id="authRequired" horizontal-align="right" horizontal-offset="12"></paper-toast>
+    <paper-toast text="Fill in the authorization form first" id="authFormError" horizontal-align="right" horizontal-offset="12"></paper-toast>
   </template>
   <script>
   Polymer({
