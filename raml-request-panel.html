@@ -218,6 +218,10 @@ This property will be propagated to all sub-elements that uses this property to 
       @apply(--raml-request-panel);
     }
 
+    *[hidden] {
+      display: none !important;
+    }
+
     .content {
       height: 100%;
       @apply(--layout-vertical);
@@ -299,7 +303,7 @@ This property will be propagated to all sub-elements that uses this property to 
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
-      <div class="url-editor">
+      <div class="url-editor" hidden$="[[noUrlEditor]]">
         <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
@@ -326,10 +330,12 @@ This property will be propagated to all sub-elements that uses this property to 
         </div>
       </div>
     </div>
-    <paper-dialog id="authDialog">
+    <paper-dialog opened="[[authDialogOpened]]">
       <h2>Authorization</h2>
       <paper-dialog-scrollable>
-        <authorization-panel secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]"></authorization-panel>
+        <template is="dom-if" if="[[authDialogOpened]]" restamp>
+          <authorization-panel secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]"></authorization-panel>
+        </template>
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss autofocus>Cancel</paper-button>
@@ -400,7 +406,10 @@ This property will be propagated to all sub-elements that uses this property to 
       // Body for the request
       payload: String,
       // Current URL
-      url: String,
+      url: {
+        type: String,
+        notify: true
+      },
       /**
        * If set it will renders the view in the narrow layout.
        */
@@ -521,7 +530,18 @@ This property will be propagated to all sub-elements that uses this property to 
        */
       urlInvalid: {
         type: Boolean
-      }
+      },
+      /**
+       * Hides the URL editor from the view.
+       * The editor is still in the DOM and the `urlInvalid` property still will be set.
+       */
+      noUrlEditor: Boolean,
+      /**
+       * If true then the authorization dialog is opened.
+       * It will be opened when the authorization is required, no auth data were set, the user
+       * is in other tab than authorization panel and clicked on "send request" button.
+       */
+      authDialogOpened: Boolean
     },
 
     observers: [
@@ -609,7 +629,7 @@ This property will be propagated to all sub-elements that uses this property to 
         this.$.authFormError.opened = true;
         return;
       }
-      this.$.authDialog.opened = true;
+      this.authDialogOpened = true;
     },
     /**
      * Handler for "authorize" button click in the authorization dialog.

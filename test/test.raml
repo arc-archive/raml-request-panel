@@ -10,12 +10,10 @@ types:
       Head: Manager # inherits all properties from type `Manager`
   Person:
     type: object
-    discriminator: kind # reference to the `kind` property of `Person`
     properties:
       firstname: string
       lastname: string
       title?: string
-      kind: string # may be used to differenciate between classes that extend from `Person`
   Phone:
     type: string
     pattern: "^[0-9|-]+$" # defines pattern for the content of type `Phone`
@@ -34,6 +32,10 @@ types:
     properties:
       phone: Phone # inherits all properties from type `Phone`; uses shortcut syntax
   Alertable: Manager | AlertableAdmin # union type; either a `Manager` or `AlertableAdmin`
+securitySchemes:
+  basic:
+    type: Basic Authentication
+    description: Authenticate!
 /people:
   displayName: People endpoint
   get:
@@ -43,7 +45,15 @@ types:
         body:
           application/json:
             type: Person[]
+  post:
+    body:
+      application/json:
+        type: object
+        properties:
+          id: number
+          name: string
 /{orgId}:
+  securedBy: basic
   get:
     responses:
       200:
@@ -54,16 +64,13 @@ types:
               onCall:
                 firstname: nico
                 lastname: ark
-                kind: admin
                 clearanceLevel: low
                 phone: "12321"
               Head:
                 firstname: nico
                 lastname: ark
-                kind: manager
                 reports:
                   -
                     firstname: nico
                     lastname: ark
-                    kind: admin
                 phone: "123-23"

@@ -1,3 +1,18 @@
+<a name="0.1.36"></a>
+## [0.1.36](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.35...v0.1.36) (2017-05-12)
+
+
+### New
+
+* Added noUrlEditor property to hide the URL panel if needed ([4d12433d505e643fde5e8e449babbf062f3b9d88](https://github.com/advanced-rest-client/raml-request-panel/commit/4d12433d505e643fde5e8e449babbf062f3b9d88))
+
+### Update
+
+* Added new tests ([8b4327eddd80229a550a489b958a7d47b5e32b4e](https://github.com/advanced-rest-client/raml-request-panel/commit/8b4327eddd80229a550a489b958a7d47b5e32b4e))
+* The auth dialog will contain authorization panel only if it is ioebed so the panel will not perform any operations while hidden ([e66453d443643c8e1a3aa8eb58a4949e0a62e58a](https://github.com/advanced-rest-client/raml-request-panel/commit/e66453d443643c8e1a3aa8eb58a4949e0a62e58a))
+
+
+
 <a name="0.1.35"></a>
 ## [0.1.35](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.34...v0.1.35) (2017-04-20)
 
