@@ -330,10 +330,12 @@ This property will be propagated to all sub-elements that uses this property to 
         </div>
       </div>
     </div>
-    <paper-dialog id="authDialog">
+    <paper-dialog opened="[[authDialogOpened]]">
       <h2>Authorization</h2>
       <paper-dialog-scrollable>
-        <authorization-panel secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]"></authorization-panel>
+        <template is="dom-if" if="[[authDialogOpened]]" restamp>
+          <authorization-panel secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]"></authorization-panel>
+        </template>
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss autofocus>Cancel</paper-button>
@@ -533,7 +535,13 @@ This property will be propagated to all sub-elements that uses this property to 
        * Hides the URL editor from the view.
        * The editor is still in the DOM and the `urlInvalid` property still will be set.
        */
-      noUrlEditor: Boolean
+      noUrlEditor: Boolean,
+      /**
+       * If true then the authorization dialog is opened.
+       * It will be opened when the authorization is required, no auth data were set, the user
+       * is in other tab than authorization panel and clicked on "send request" button.
+       */
+      authDialogOpened: Boolean
     },
 
     observers: [
@@ -621,7 +629,7 @@ This property will be propagated to all sub-elements that uses this property to 
         this.$.authFormError.opened = true;
         return;
       }
-      this.$.authDialog.opened = true;
+      this.authDialogOpened = true;
     },
     /**
      * Handler for "authorize" button click in the authorization dialog.
