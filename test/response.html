@@ -1,0 +1,145 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../iron-test-helpers/test-helpers.js"></script>
+    <script src="../../iron-test-helpers/mock-interactions.js"></script>
+
+    <link rel="import" href="../../fetch-polyfill/fetch-polyfill.html">
+    <link rel="import" href="../raml-request-panel.html">
+  </head>
+  <body>
+
+    <test-fixture id="basic">
+      <template>
+        <raml-request-panel></raml-request-panel>
+      </template>
+    </test-fixture>
+
+    <script>
+    /* global fixture, assert, TestHelpers, sinon, forceXIfStamp */
+    suite('api-console-response', function() {
+      var REQUEST_URL =
+        'https://cdn.rawgit.com/advanced-rest-client/arc-datastore-api/4e1cd2c6/api.raml';
+      var REQUEST_METHOD = 'GET';
+      var REQUEST_HEADERS = {'accept': 'application/json'};
+
+      var RESPONSE_STATUS = 200;
+      var RESPONSE_STATUS_TEXT = 'OK';
+      var RESPONSE_BODY = '{"test":true}';
+      var RESPONSE_HEADERS = {
+        'Content-Type': 'application/json',
+        'Content-Length': RESPONSE_BODY.length
+      };
+
+      var LOAD_TIME = 123;
+
+      function createRequest() {
+        var init = {
+          method: REQUEST_METHOD,
+          mode: 'cors',
+          headers: new Headers(REQUEST_HEADERS)
+        };
+        return new Request(REQUEST_URL, init);
+      }
+
+      function createResponse() {
+        var init = {
+          status: RESPONSE_STATUS,
+          statusText: RESPONSE_STATUS_TEXT,
+          headers: new Headers(RESPONSE_HEADERS)
+        };
+        return new Response(RESPONSE_BODY, init);
+      }
+
+      function fireResponse() {
+        var detail = {
+          request: createRequest(),
+          response: createResponse(),
+          loadingTime: LOAD_TIME,
+          isXhr: true
+        };
+        var event = new CustomEvent('api-console-response', {
+          cancelable: false,
+          bubbles: true,
+          composed: true,
+          detail: detail
+        });
+        document.body.dispatchEvent(event);
+      }
+
+      suite('setting up properties', function() {
+        var element;
+        setup(function() {
+          element = fixture('basic');
+          fireResponse();
+        });
+
+        test('responseIsXhr is true', function() {
+          assert.isTrue(element.responseIsXhr);
+        });
+
+        test('request is typeof Request', function() {
+          assert.typeOf(element.request, 'request');
+        });
+
+        test('response is typeof Response', function() {
+          assert.typeOf(element.response, 'response');
+        });
+
+        test('loadingTime is set', function() {
+          assert.equal(element.loadingTime, LOAD_TIME);
+        });
+
+        test('responseError is undefined', function() {
+          assert.isUndefined(element.responseError);
+        });
+
+        test('timings is undefined', function() {
+          assert.isUndefined(element.timings);
+        });
+
+        test('redirectTimings is undefined', function() {
+          assert.isUndefined(element.redirectTimings);
+        });
+
+        test('redirects is undefined', function() {
+          assert.isUndefined(element.redirects);
+        });
+
+        test('sourceMessage is undefined', function() {
+          assert.isUndefined(element.sourceMessage);
+        });
+      });
+
+      suite('sending event', function() {
+        var element;
+        setup(function() {
+          element = fixture('basic');
+        });
+
+        test('api-console-response-ready is fired', function() {
+          var spy = sinon.stub();
+          element.addEventListener('api-console-response-ready', spy);
+          fireResponse();
+          assert.isTrue(spy.calledOnce);
+        });
+      });
+    });
+    </script>
+
+  </body>
+</html>

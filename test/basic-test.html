@@ -45,7 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <script>
     /* global fixture, assert, TestHelpers, sinon, forceXIfStamp */
-    suite('basic', function() {
+    suite('get-method', function() {
 
       var element;
       var raml;
@@ -81,6 +81,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('authRequired is false', function() {
         assert.isFalse(element.authRequired);
+      });
+
+      test('selectedTab is 1', function() {
+        assert.equal(element.selectedTab, 1);
       });
 
       test('Should serialize request', function() {
@@ -122,6 +126,104 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var button = Polymer.dom(element.root).querySelector('.action-button');
         assert.isTrue(button.disabled);
       });
+    });
+
+    suite('post-method', function() {
+
+      var element;
+      var raml;
+      var method;
+
+      suiteSetup(function(done) {
+        var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+        var parser = fixture('parser');
+        var enhancer = fixture('enhancer');
+        enhancer.addEventListener('raml-json-enhance-ready', function(e) {
+          raml = e.detail.json;
+          method = raml.resources[0].methods[1];
+          done();
+        });
+        parser.loadApi(baseUrl + 'test.raml')
+        .then(function(data) {
+          enhancer.json = data.json.specification;
+        })
+        .catch(function(e) {
+          done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
+        });
+      });
+
+      setup(function() {
+        element = fixture('basic');
+        element.method = method;
+        TestHelpers.forceXIfStamp(element);
+      });
+
+      test('isPayloadRequest is true', function() {
+        assert.isTrue(element.isPayloadRequest);
+      });
+
+      test('authRequired is false', function() {
+        assert.isFalse(element.authRequired);
+      });
+
+      test('Auto add content type', function() {
+        assert.equal(element.headers, 'Content-Type: application/json');
+      });
+
+      test('Should serialize request', function() {
+        var request = {
+          method: 'POST',
+          url: element.method.absoluteUri,
+          headers: 'Content-Type: application/json',
+          payload: ''
+        };
+        var result = element.serializeRequest();
+        assert.deepEqual(result, request);
+      });
+    });
+
+    suite('with authorization', function() {
+
+      var element;
+      var raml;
+      var method;
+
+      suiteSetup(function(done) {
+        var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+        var parser = fixture('parser');
+        var enhancer = fixture('enhancer');
+        enhancer.addEventListener('raml-json-enhance-ready', function(e) {
+          raml = e.detail.json;
+          method = raml.resources[1].methods[0];
+          done();
+        });
+        parser.loadApi(baseUrl + 'test.raml')
+        .then(function(data) {
+          enhancer.json = data.json.specification;
+        })
+        .catch(function(e) {
+          done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
+        });
+      });
+
+      setup(function() {
+        element = fixture('basic');
+        element.method = method;
+        TestHelpers.forceXIfStamp(element);
+      });
+
+      test('authRequired is true', function() {
+        assert.isTrue(element.authRequired);
+      });
+
+      test('authNeeded is true', function() {
+        assert.isTrue(element.authNeeded);
+      });
+
+      test('authValid is false', function() {
+        assert.isFalse(element.authValid);
+      });
+
     });
     </script>
 
