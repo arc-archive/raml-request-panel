@@ -1,3 +1,24 @@
+<a name="0.1.38"></a>
+## [0.1.38](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.37...0.1.38) (2017-07-24)
+
+
+### Fix
+
+* Fixed linter errors. ([7b1d0e7bfdbcc1b1080549d71f545c600d54a7b5](https://github.com/advanced-rest-client/raml-request-panel/commit/7b1d0e7bfdbcc1b1080549d71f545c600d54a7b5))
+* Fixed linter warnings. ([bd06f27ad500b3c6ff9d49ea7794970a9a704177](https://github.com/advanced-rest-client/raml-request-panel/commit/bd06f27ad500b3c6ff9d49ea7794970a9a704177))
+* Fixed test definition. ([0ac506550fd8326f2faf37eecb82e62d72a1c31f](https://github.com/advanced-rest-client/raml-request-panel/commit/0ac506550fd8326f2faf37eecb82e62d72a1c31f))
+* Fixed tests implementation. ([1049358229e9fde64042269188bff8f2cbd11e37](https://github.com/advanced-rest-client/raml-request-panel/commit/1049358229e9fde64042269188bff8f2cbd11e37))
+
+### Update
+
+* Removed one test for Safari. It should be resoted with https://github.com/advanced-rest-client/raml-request-url-editor/issues/2 ([6722cf8cdcebd7e01978f209ab854e83ead5aa2d](https://github.com/advanced-rest-client/raml-request-panel/commit/6722cf8cdcebd7e01978f209ab854e83ead5aa2d))
+* Removed sudo for travis. ([11713468673a140b121011dda6c14038370eaf8f](https://github.com/advanced-rest-client/raml-request-panel/commit/11713468673a140b121011dda6c14038370eaf8f))
+* Updated dependency version. ([5d76aa44f10f72b997cb79ac75d89067f6777be5](https://github.com/advanced-rest-client/raml-request-panel/commit/5d76aa44f10f72b997cb79ac75d89067f6777be5))
+* Updated keywords in the bower file. ([933a0a39c6636a10d150ed5f6605b3464756183c](https://github.com/advanced-rest-client/raml-request-panel/commit/933a0a39c6636a10d150ed5f6605b3464756183c))
+* Updated test dependencies and configuration. ([34a0427c533990daa42ca21f5ab8ec31a989dd0c](https://github.com/advanced-rest-client/raml-request-panel/commit/34a0427c533990daa42ca21f5ab8ec31a989dd0c))
+
+
+
 <a name="0.1.37"></a>
 ## [0.1.37](https://github.com/advanced-rest-client/raml-request-panel/compare/0.1.36...v0.1.37) (2017-05-12)
 
