@@ -92,12 +92,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           assert.isTrue(element.responseIsXhr);
         });
 
+        // This is covered by polyfill in some browsers so it can be either
+        // object or Request. Here it checks if its set
         test('request is typeof Request', function() {
-          assert.typeOf(element.request, 'object');
+          assert.ok(element.request);
         });
 
         test('response is typeof Response', function() {
-          assert.typeOf(element.response, 'object');
+          assert.ok(element.response);
         });
 
         test('loadingTime is set', function() {
