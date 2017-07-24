@@ -93,11 +93,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         test('request is typeof Request', function() {
-          assert.typeOf(element.request, 'request');
+          assert.typeOf(element.request, 'object');
         });
 
         test('response is typeof Response', function() {
-          assert.typeOf(element.response, 'response');
+          assert.typeOf(element.response, 'object');
         });
 
         test('loadingTime is set', function() {
