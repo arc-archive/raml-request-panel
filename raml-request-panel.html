@@ -316,8 +316,8 @@ This property will be propagated to all sub-elements that uses this property to 
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
-        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]" is-required="{{authRequired}}"></authorization-panel>
-        <raml-request-parameters-editor narrow="[[narrow]]" query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-parameters-editor>
+        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]" is-required="{{authRequired}}"></authorization-panel>
+        <raml-request-parameters-editor query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
       </iron-pages>
@@ -334,7 +334,7 @@ This property will be propagated to all sub-elements that uses this property to 
       <h2>Authorization</h2>
       <paper-dialog-scrollable>
         <template is="dom-if" if="[[authDialogOpened]]" restamp>
-          <authorization-panel secured-by="[[method.securedBy]]" narrow="[[narrow]]" request-url="[[url]]" request-method="[[method.method]]" redirect-url="[[redirectUrl]]"></authorization-panel>
+          <authorization-panel secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]"></authorization-panel>
         </template>
       </paper-dialog-scrollable>
       <div class="buttons">
