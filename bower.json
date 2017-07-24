@@ -6,7 +6,10 @@
   ],
   "keywords": [
     "web-components",
-    "polymer"
+    "polymer",
+    "raml",
+    "request",
+    "editor"
   ],
   "private": true,
   "main": [
