@@ -60,6 +60,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           method = raml.resources[0].methods[0];
           done();
         });
+        enhancer.addEventListener('error', function(e) {
+          e = new Error(e.message || 'Unknown error');
+          done(e);
+        });
         parser.loadApi(baseUrl + 'test.raml')
         .then(function(data) {
           enhancer.json = data.json.specification;
@@ -145,6 +149,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           method = raml.resources[0].methods[1];
           done();
         });
+        enhancer.addEventListener('error', function(e) {
+          e = new Error(e.message || 'Unknown error');
+          done(e);
+        });
         parser.loadApi(baseUrl + 'test.raml')
         .then(function(data) {
           enhancer.json = data.json.specification;
@@ -198,6 +206,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           raml = e.detail.json;
           method = raml.resources[1].methods[0];
           done();
+        });
+        enhancer.addEventListener('error', function(e) {
+          e = new Error(e.message || 'Unknown error');
+          done(e);
         });
         parser.loadApi(baseUrl + 'test.raml')
         .then(function(data) {
