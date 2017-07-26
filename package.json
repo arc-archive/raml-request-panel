@@ -16,7 +16,7 @@
   "author": "The Advanced REST client authors <arc@mulesoft.com>",
   "scripts": {
     "serve": "node_modules/.bin/polymer serve",
-    "lint": "node_modules/.bin/polymer lint raml-request-panel.html",
+    "lint": "node_modules/.bin/polymer lint raml-request-panel.html raml-request-panel-simple-xhr.html",
     "test-sauce": "node_modules/.bin/polymer test --plugin sauce --job-name \"raml-request-panel:local-test\"",
     "test": "node_modules/.bin/polymer test --plugin local",
     "deps": "npm install --quiet && bower install --quiet",
