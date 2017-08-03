@@ -55,6 +55,15 @@ securitySchemes:
 /{orgId}:
   securedBy: basic
   get:
+    queryParameters:
+      test:
+        type: string
+        default: test
+        example: test
+      optional:
+        type: string
+        required: false
+        example: optional-test
     responses:
       200:
         body:
