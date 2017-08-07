@@ -1,6 +1,7 @@
 {
   "name": "raml-request-panel",
   "description": "The request panel view for the request defined as a RAML method",
+  "version": "0.2.0",
   "authors": [
     "The Advanced REST client authors <arc@mulesoft.com>"
   ],
@@ -72,6 +73,5 @@
     "bower_components",
     "test",
     "tasks"
-  ],
-  "version": "0.1.41"
+  ]
 }
