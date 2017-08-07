@@ -49,8 +49,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 </head>
 <body unresolved>
-  <template is="dom-bind" id="app">
+  <template is="dom-bind">
     <raml-demo-page selected-object="{{selected}}" narrow="{{narrow}}" is-method="{{isMethod}}">
+      <paper-item data-url$="[[testRaml]]">Test case with RAML 1.0</paper-item>
+      <paper-item data-url="https://cdn.rawgit.com/advanced-rest-client/echo-advancedrestclient-com/master/api/api.raml">ARC Echo service</paper-item>
       <h1>The raml-request-panel element</h1>
       <div main>
         <template is="dom-if" if="[[isMethod]]" restamp="true">
@@ -74,10 +76,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <api-console-ext-comm></api-console-ext-comm>
   </template>
   <script>
-  var scope = document.querySelector('#app');
-  var redirectUrl = location.href.replace(/\/raml-request-panel\/demo(\/)?(index.html)?/,
-    '/oauth-authorization/oauth-popup.html');
-  scope.redirectUrl = redirectUrl;
+  (function(app) {
+    var path = location.pathname;
+    if (~path.indexOf('.html')) {
+      path = path.substr(0, path.lastIndexOf('/') + 1);
+    }
+    var ramlRoot = location.protocol + '//' + location.host + path.replace('demo', 'test');
+    app.testRaml = ramlRoot + 'test.raml';
+    var redirectUrl = location.href.replace(/\/raml-request-panel\/demo(\/)?(index.html)?/,
+      '/oauth-authorization/oauth-popup.html');
+    app.redirectUrl = redirectUrl;
+  })(document.querySelector('template[is="dom-bind"]'));
   </script>
 </body>
 </html>
