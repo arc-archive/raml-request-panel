@@ -522,7 +522,9 @@ This property will be propagated to all sub-elements that uses this property to 
       authNeeded: {
         type: Boolean,
         value: false,
-        computed: '_computeAuthNeeded(authValid,authorizationMethod,authorizationSettings)'
+        // jscs: disable
+        computed: '_computeAuthNeeded(authRequired,authValid,authorizationMethod,authorizationSettings)'
+        // jscs: enable
       },
       /**
        * Computed value when the URL change.
@@ -744,12 +746,15 @@ This property will be propagated to all sub-elements that uses this property to 
       }
     },
 
-    _computeAuthNeeded: function(authValid, authorizationMethod, authorizationSettings) {
+    _computeAuthNeeded: function(required, authValid, authMethod, settings) {
+      if (!required) {
+        return false;
+      }
       if (!authValid) {
         return true;
       }
-      if (authorizationMethod === 'oauth2') {
-        if (!authorizationSettings.tokenValue) {
+      if (authMethod === 'oauth2') {
+        if (!settings.tokenValue) {
           return true;
         }
       }
