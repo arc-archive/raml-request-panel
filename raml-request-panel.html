@@ -509,9 +509,9 @@ This property will be propagated to all sub-elements that uses this property to 
       // OAuth2 redirect URL
       redirectUrl: String,
       // Selected by the user auth method (if any)
-      authorizationMethod: String,
+      authMethod: String,
       // Current authorization settings.
-      authorizationSettings: Object,
+      authSettings: Object,
       // If true then the authorization panel passed validation and auth data are set.
       authValid: Boolean,
       /**
@@ -523,7 +523,7 @@ This property will be propagated to all sub-elements that uses this property to 
         type: Boolean,
         value: false,
         // jscs: disable
-        computed: '_computeAuthNeeded(authRequired,authValid,authorizationMethod,authorizationSettings)'
+        computed: '_computeAuthNeeded(authRequired,authValid,authMethod,authSettings)'
         // jscs: enable
       },
       /**
@@ -644,16 +644,16 @@ This property will be propagated to all sub-elements that uses this property to 
         return;
       }
       var callSend = false;
-      switch (this.authorizationMethod) {
+      switch (this.authMethod) {
         case 'oauth2':
-          if (!this.authorizationSettings || !this.authorizationSettings.tokenValue) {
-            this.fire('oauth2-token-requested', this.authorizationSettings);
+          if (!this.authSettings || !this.authSettings.tokenValue) {
+            this.fire('oauth2-token-requested', this.authSettings);
           } else {
             callSend = true;
           }
           break;
         case 'basic':
-          if (!this.authorizationSettings || !this.authorizationSettings.hash) {
+          if (!this.authSettings || !this.authSettings.hash) {
             this.$.authRequired.opened = true;
             return;
           } else {
@@ -737,8 +737,8 @@ This property will be propagated to all sub-elements that uses this property to 
     },
 
     _authSettingsChanged: function(e) {
-      this.authorizationMethod = e.detail.type;
-      this.authorizationSettings = e.detail.settings;
+      this.authMethod = e.detail.type;
+      this.authSettings = e.detail.settings;
       this.set('authValid', e.detail.valid);
       if (this.__pendingRequest) {
         this.__pendingRequest = false;
