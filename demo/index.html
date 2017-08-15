@@ -29,6 +29,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     --paper-tabs-selection-bar-color: rgba(0, 161, 223, 1);
     --accent-color: #CC143C;
     --action-accent-button-disabled-color: rgba(204, 20, 60, 0.42);
+    --raml-path-selector-background-color: #F5F5F5;
+
+    --code-mirror: {
+      background-color: #f5f2f0;
+    };
+
+    --code-mirror-editor: {
+      background-color: #f5f2f0;
+      z-index: 0;
+      display: block;
+    };
+
+    --code-background-color: #f5f2f0;
+    --code-mirror-background-color: #f5f2f0;
   }
   html,
   body {
@@ -40,6 +54,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
+    background-color: #F5F5F5;
+  }
+
+  .demo-area {
+    background-color: #fff;
+    padding: 12px;
+    margin-left: 12px;
   }
 
   raml-request-panel {
@@ -49,12 +70,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 </head>
 <body unresolved>
-  <template is="dom-bind" id="app">
+  <template is="dom-bind">
     <raml-demo-page selected-object="{{selected}}" narrow="{{narrow}}" is-method="{{isMethod}}">
+      <paper-item data-url$="[[testRaml]]">Test case with RAML 1.0</paper-item>
+      <paper-item data-url="https://cdn.rawgit.com/advanced-rest-client/echo-advancedrestclient-com/master/api/api.raml">ARC Echo service</paper-item>
+      <paper-item main-menu class="checkable-menu"><paper-item-body>No URL editor</paper-item-body><paper-checkbox checked="{{noUrl}}"></paper-checkbox></paper-item>
       <h1>The raml-request-panel element</h1>
       <div main>
         <template is="dom-if" if="[[isMethod]]" restamp="true">
-          <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]" loading-time="{{loadingTime}}"></raml-request-panel>
+          <div class="demo-area">
+            <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]" loading-time="{{loadingTime}}" no-url-editor="[[noUrl]]"></raml-request-panel>
+          </div>
           <template is="dom-if" if="[[response.ok]]">
             <p>Request succeeded</p>
             <p>Loading time: [[loadingTime]] ms</p>
@@ -74,10 +100,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <api-console-ext-comm></api-console-ext-comm>
   </template>
   <script>
-  var scope = document.querySelector('#app');
-  var redirectUrl = location.href.replace(/\/raml-request-panel\/demo(\/)?(index.html)?/,
-    '/oauth-authorization/oauth-popup.html');
-  scope.redirectUrl = redirectUrl;
+  (function(app) {
+    var path = location.pathname;
+    if (~path.indexOf('.html')) {
+      path = path.substr(0, path.lastIndexOf('/') + 1);
+    }
+    var ramlRoot = location.protocol + '//' + location.host + path.replace('demo', 'test');
+    app.testRaml = ramlRoot + 'test.raml';
+    var redirectUrl = location.href.replace(/\/raml-request-panel\/demo(\/)?(index.html)?/,
+      '/oauth-authorization/oauth-popup.html');
+    app.redirectUrl = redirectUrl;
+  })(document.querySelector('template[is="dom-bind"]'));
   </script>
 </body>
 </html>
