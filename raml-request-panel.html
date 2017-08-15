@@ -289,6 +289,10 @@ This property will be propagated to all sub-elements that uses this property to 
     paper-spinner {
       margin-right: 8px;
     }
+      
+    paper-dialog {
+      @apply(--raml-request-panel-popup);
+    }
 
     .panel-warning {
       width: 16px;
@@ -297,14 +301,14 @@ This property will be propagated to all sub-elements that uses this property to 
       color: #FF5722;
     }
 
-    /*.auth-required-info {
-      color: rgba(0, 0, 0, 0.54);
-    }*/
+    .url-invalid-info {
+      @apply --arc-font-body1;
+    }
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
       <div class="url-editor" hidden$="[[noUrlEditor]]">
-        <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}"></raml-request-url-editor>
+        <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}" base-uri="[[baseUri]]"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
         <paper-tab hidden$="[[!authRequired]]">
@@ -509,9 +513,9 @@ This property will be propagated to all sub-elements that uses this property to 
       // OAuth2 redirect URL
       redirectUrl: String,
       // Selected by the user auth method (if any)
-      authorizationMethod: String,
+      authMethod: String,
       // Current authorization settings.
-      authorizationSettings: Object,
+      authSettings: Object,
       // If true then the authorization panel passed validation and auth data are set.
       authValid: Boolean,
       /**
@@ -522,7 +526,9 @@ This property will be propagated to all sub-elements that uses this property to 
       authNeeded: {
         type: Boolean,
         value: false,
-        computed: '_computeAuthNeeded(authValid,authorizationMethod,authorizationSettings)'
+        // jscs: disable
+        computed: '_computeAuthNeeded(authRequired,authValid,authMethod,authSettings)'
+        // jscs: enable
       },
       /**
        * Computed value when the URL change.
@@ -541,7 +547,14 @@ This property will be propagated to all sub-elements that uses this property to 
        * It will be opened when the authorization is required, no auth data were set, the user
        * is in other tab than authorization panel and clicked on "send request" button.
        */
-      authDialogOpened: Boolean
+      authDialogOpened: Boolean,
+      /**
+       * A base URI for the API. To be set if RAML spec is missing `baseUri`
+       * declaration and this produces invalid URL input. This information
+       * is passed to the URL editor that prefixes the URL with `baseUri` value
+       * if passed URL is a relative URL.
+       */
+      baseUri: String
     },
 
     observers: [
@@ -642,16 +655,16 @@ This property will be propagated to all sub-elements that uses this property to 
         return;
       }
       var callSend = false;
-      switch (this.authorizationMethod) {
+      switch (this.authMethod) {
         case 'oauth2':
-          if (!this.authorizationSettings || !this.authorizationSettings.tokenValue) {
-            this.fire('oauth2-token-requested', this.authorizationSettings);
+          if (!this.authSettings || !this.authSettings.tokenValue) {
+            this.fire('oauth2-token-requested', this.authSettings);
           } else {
             callSend = true;
           }
           break;
         case 'basic':
-          if (!this.authorizationSettings || !this.authorizationSettings.hash) {
+          if (!this.authSettings || !this.authSettings.hash) {
             this.$.authRequired.opened = true;
             return;
           } else {
@@ -735,8 +748,8 @@ This property will be propagated to all sub-elements that uses this property to 
     },
 
     _authSettingsChanged: function(e) {
-      this.authorizationMethod = e.detail.type;
-      this.authorizationSettings = e.detail.settings;
+      this.authMethod = e.detail.type;
+      this.authSettings = e.detail.settings;
       this.set('authValid', e.detail.valid);
       if (this.__pendingRequest) {
         this.__pendingRequest = false;
@@ -744,12 +757,15 @@ This property will be propagated to all sub-elements that uses this property to 
       }
     },
 
-    _computeAuthNeeded: function(authValid, authorizationMethod, authorizationSettings) {
+    _computeAuthNeeded: function(required, authValid, authMethod, settings) {
+      if (!required) {
+        return false;
+      }
       if (!authValid) {
         return true;
       }
-      if (authorizationMethod === 'oauth2') {
-        if (!authorizationSettings.tokenValue) {
+      if (authMethod === 'oauth2') {
+        if (!settings.tokenValue) {
           return true;
         }
       }
