@@ -304,7 +304,7 @@ This property will be propagated to all sub-elements that uses this property to 
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
     <div class="content">
       <div class="url-editor" hidden$="[[noUrlEditor]]">
-        <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}"></raml-request-url-editor>
+        <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}" base-uri="[[baseUri]]"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
         <paper-tab hidden$="[[!authRequired]]">
@@ -543,7 +543,14 @@ This property will be propagated to all sub-elements that uses this property to 
        * It will be opened when the authorization is required, no auth data were set, the user
        * is in other tab than authorization panel and clicked on "send request" button.
        */
-      authDialogOpened: Boolean
+      authDialogOpened: Boolean,
+      /**
+       * A base URI for the API. To be set if RAML spec is missing `baseUri`
+       * declaration and this produces invalid URL input. This information
+       * is passed to the URL editor that prefixes the URL with `baseUri` value
+       * if passed URL is a relative URL.
+       */
+      baseUri: String
     },
 
     observers: [
