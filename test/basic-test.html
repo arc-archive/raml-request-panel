@@ -9,237 +9,231 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
-    <script src="../../iron-test-helpers/test-helpers.js"></script>
-    <script src="../../iron-test-helpers/mock-interactions.js"></script>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../iron-test-helpers/test-helpers.js"></script>
+  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+  <link rel="import" href="../../fetch-polyfill/fetch-polyfill.html">
+  <link rel="import" href="../../raml-js-parser/raml-js-parser.html">
+  <link rel="import" href="../../raml-json-enhance/raml-json-enhance.html">
+  <link rel="import" href="../raml-request-panel.html">
+</head>
 
-    <link rel="import" href="../../fetch-polyfill/fetch-polyfill.html">
-    <link rel="import" href="../../raml-js-parser/raml-js-parser.html">
-    <link rel="import" href="../../raml-json-enhance/raml-json-enhance.html">
-    <link rel="import" href="../raml-request-panel.html">
-  </head>
-  <body>
+<body>
+  <test-fixture id="parser">
+    <template>
+      <raml-js-parser json></raml-js-parser>
+    </template>
+  </test-fixture>
+  <test-fixture id="enhancer">
+    <template>
+      <raml-json-enhance></raml-json-enhance>
+    </template>
+  </test-fixture>
+  <test-fixture id="basic">
+    <template>
+      <raml-request-panel></raml-request-panel>
+    </template>
+  </test-fixture>
+  <script>
+  /* global fixture, assert, TestHelpers, sinon */
+  suite('get-method', function() {
 
-    <test-fixture id="parser">
-      <template>
-        <raml-js-parser json></raml-js-parser>
-      </template>
-    </test-fixture>
+    var element;
+    var raml;
+    var method;
 
-    <test-fixture id="enhancer">
-      <template>
-        <raml-json-enhance></raml-json-enhance>
-      </template>
-    </test-fixture>
-
-    <test-fixture id="basic">
-      <template>
-        <raml-request-panel></raml-request-panel>
-      </template>
-    </test-fixture>
-
-    <script>
-    /* global fixture, assert, TestHelpers, sinon */
-    suite('get-method', function() {
-
-      var element;
-      var raml;
-      var method;
-
-      suiteSetup(function(done) {
-        var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-        var parser = fixture('parser');
-        var enhancer = fixture('enhancer');
-        enhancer.addEventListener('raml-json-enhance-ready', function(e) {
-          raml = e.detail.json;
-          method = raml.resources[0].methods[0];
-          done();
-        });
-        enhancer.addEventListener('error', function(e) {
-          e = new Error(e.message || 'Unknown error');
-          done(e);
-        });
-        parser.loadApi(baseUrl + 'test.raml')
+    suiteSetup(function(done) {
+      this.timeout(30000);
+      var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+      var parser = fixture('parser');
+      var enhancer = fixture('enhancer');
+      enhancer.addEventListener('raml-json-enhance-ready', function(e) {
+        raml = e.detail.json;
+        method = raml.resources[0].methods[0];
+        done();
+      });
+      enhancer.addEventListener('error', function(e) {
+        e = new Error(e.message || 'Unknown error');
+        done(e);
+      });
+      parser.loadApi(baseUrl + 'test.raml')
         .then(function(data) {
           enhancer.json = data.json.specification;
         })
         .catch(function(e) {
           done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
         });
-      });
-
-      setup(function() {
-        element = fixture('basic');
-        element.method = method;
-        TestHelpers.forceXIfStamp(element);
-      });
-
-      test('isPayloadRequest is false', function() {
-        assert.isFalse(element.isPayloadRequest);
-      });
-
-      test('authRequired is false', function() {
-        assert.isFalse(element.authRequired);
-      });
-
-      test('selectedTab is 1', function() {
-        assert.equal(element.selectedTab, 1);
-      });
-
-      test('Should serialize request', function() {
-        var request = {
-          method: 'GET',
-          url: element.method.absoluteUri,
-          headers: '',
-          payload: ''
-        };
-        assert.deepEqual(element.serializeRequest(), request);
-      });
-
-      test('Should fire `api-console-request` event', function() {
-        var spy = sinon.stub();
-        element.addEventListener('api-console-request', spy);
-        element.execute();
-        assert.isTrue(spy.calledOnce);
-      });
-
-      test('Should `api-console-request` have the request details', function(done) {
-        element.addEventListener('api-console-request', function(e) {
-          var request = {
-            method: 'GET',
-            url: element.method.absoluteUri,
-            headers: '',
-            payload: ''
-          };
-          assert.deepEqual(e.detail, request);
-          e.preventDefault();
-          done();
-        });
-        element.execute();
-      });
-      // Safari uses URL class polyfill and this URL is valid according to this
-      // class.
-      // TODO: Fix this issue.
-      // test('Send request button is disabled when url is invalid', function() {
-      //   element.url = '/test';
-      //   forceXIfStamp(element);
-      //   assert.isTrue(element.urlInvalid);
-      //   var button = Polymer.dom(element.root).querySelector('.action-button');
-      //   assert.isTrue(button.disabled);
-      // });
     });
 
-    suite('post-method', function() {
+    setup(function() {
+      element = fixture('basic');
+      element.method = method;
+      TestHelpers.forceXIfStamp(element);
+    });
 
-      var element;
-      var raml;
-      var method;
+    test('isPayloadRequest is false', function() {
+      assert.isFalse(element.isPayloadRequest);
+    });
 
-      suiteSetup(function(done) {
-        var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-        var parser = fixture('parser');
-        var enhancer = fixture('enhancer');
-        enhancer.addEventListener('raml-json-enhance-ready', function(e) {
-          raml = e.detail.json;
-          method = raml.resources[0].methods[1];
-          done();
-        });
-        enhancer.addEventListener('error', function(e) {
-          e = new Error(e.message || 'Unknown error');
-          done(e);
-        });
-        parser.loadApi(baseUrl + 'test.raml')
+    test('authRequired is false', function() {
+      assert.isFalse(element.authRequired);
+    });
+
+    test('selectedTab is 1', function() {
+      assert.equal(element.selectedTab, 1);
+    });
+
+    test('Serializes the request', function() {
+      var serialized = element.serializeRequest();
+      assert.equal(serialized.method, 'GET', 'Method is set');
+      assert.equal(serialized.url, element.method.absoluteUri, 'URL is set');
+      assert.equal(serialized.headers, '', 'Headers are empty');
+      assert.isFalse(!!serialized.payload, 'Payload is empty');
+    });
+
+    test('Should fire `api-console-request` event', function() {
+      var spy = sinon.stub();
+      element.addEventListener('api-console-request', spy);
+      element.execute();
+      assert.isTrue(spy.calledOnce);
+    });
+
+    test('The `api-console-request` event has request details', function(done) {
+      element.addEventListener('api-console-request', function(e) {
+        e.preventDefault();
+
+        var req = e.detail;
+        assert.equal(req.method, 'GET', 'Method is set');
+        assert.equal(req.url, element.method.absoluteUri, 'URL is set');
+        assert.equal(req.headers, '', 'Headers are empty');
+        assert.isFalse(!!req.payload, 'Payload is empty');
+
+        done();
+      });
+      element.execute();
+    });
+    // Safari uses URL class polyfill and this URL is valid according to this
+    // class.
+    // TODO: Fix this issue.
+    // test('Send request button is disabled when url is invalid', function() {
+    //   element.url = '/test';
+    //   forceXIfStamp(element);
+    //   assert.isTrue(element.urlInvalid);
+    //   var button = Polymer.dom(element.root).querySelector('.action-button');
+    //   assert.isTrue(button.disabled);
+    // });
+  });
+
+  suite('post-method', function() {
+
+    var element;
+    var raml;
+    var method;
+
+    suiteSetup(function(done) {
+      this.timeout(30000);
+      var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+      var parser = fixture('parser');
+      var enhancer = fixture('enhancer');
+      enhancer.addEventListener('raml-json-enhance-ready', function(e) {
+        raml = e.detail.json;
+        method = raml.resources[0].methods[1];
+        done();
+      });
+      enhancer.addEventListener('error', function(e) {
+        e = new Error(e.message || 'Unknown error');
+        done(e);
+      });
+      parser.loadApi(baseUrl + 'test.raml')
         .then(function(data) {
           enhancer.json = data.json.specification;
         })
         .catch(function(e) {
           done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
         });
-      });
-
-      setup(function() {
-        element = fixture('basic');
-        element.method = method;
-        TestHelpers.forceXIfStamp(element);
-      });
-
-      test('isPayloadRequest is true', function() {
-        assert.isTrue(element.isPayloadRequest);
-      });
-
-      test('authRequired is false', function() {
-        assert.isFalse(element.authRequired);
-      });
-
-      test('Auto add content type', function() {
-        assert.equal(element.headers, 'Content-Type: application/json');
-      });
-
-      test('Should serialize request', function() {
-        var request = {
-          method: 'POST',
-          url: element.method.absoluteUri,
-          headers: 'Content-Type: application/json',
-          payload: ''
-        };
-        var result = element.serializeRequest();
-        assert.deepEqual(result, request);
-      });
     });
 
-    suite('with authorization', function() {
+    setup(function() {
+      element = fixture('basic');
+      element.method = method;
+      TestHelpers.forceXIfStamp(element);
+    });
 
-      var element;
-      var raml;
-      var method;
+    test('isPayloadRequest is true', function() {
+      assert.isTrue(element.isPayloadRequest);
+    });
 
-      suiteSetup(function(done) {
-        var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-        var parser = fixture('parser');
-        var enhancer = fixture('enhancer');
-        enhancer.addEventListener('raml-json-enhance-ready', function(e) {
-          raml = e.detail.json;
-          method = raml.resources[1].methods[0];
-          done();
-        });
-        enhancer.addEventListener('error', function(e) {
-          e = new Error(e.message || 'Unknown error');
-          done(e);
-        });
-        parser.loadApi(baseUrl + 'test.raml')
+    test('authRequired is false', function() {
+      assert.isFalse(element.authRequired);
+    });
+
+    test('Auto add content type', function() {
+      assert.equal(element.headers, 'Content-Type: application/json');
+    });
+
+    test('Should serialize request', function() {
+      var result = element.serializeRequest();
+      assert.equal(result.method, 'POST', 'Method is set');
+      assert.equal(result.url, element.method.absoluteUri, 'URL is set');
+      assert.equal(result.headers, 'Content-Type: application/json', 'Headers are set');
+      assert.isFalse(!!result.payload, 'Payload is empty');
+    });
+  });
+
+  suite('with authorization', function() {
+
+    var element;
+    var raml;
+    var method;
+
+    suiteSetup(function(done) {
+      this.timeout(30000);
+      var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+      var parser = fixture('parser');
+      var enhancer = fixture('enhancer');
+      enhancer.addEventListener('raml-json-enhance-ready', function(e) {
+        raml = e.detail.json;
+        method = raml.resources[1].methods[0];
+        done();
+      });
+      enhancer.addEventListener('error', function(e) {
+        e = new Error(e.message || 'Unknown error');
+        done(e);
+      });
+      parser.loadApi(baseUrl + 'test.raml')
         .then(function(data) {
           enhancer.json = data.json.specification;
         })
         .catch(function(e) {
           done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
         });
-      });
-
-      setup(function() {
-        element = fixture('basic');
-        element.method = method;
-        TestHelpers.forceXIfStamp(element);
-      });
-
-      test('authRequired is true', function() {
-        assert.isTrue(element.authRequired);
-      });
-
-      test('authNeeded is true', function() {
-        assert.isTrue(element.authNeeded);
-      });
-
-      test('authValid is false', function() {
-        assert.isFalse(element.authValid);
-      });
-
     });
-    </script>
 
-  </body>
+    setup(function() {
+      element = fixture('basic');
+      element.method = method;
+      TestHelpers.forceXIfStamp(element);
+    });
+
+    test('authRequired is true', function() {
+      assert.isTrue(element.authRequired);
+    });
+
+    test('authNeeded is true', function() {
+      assert.isTrue(element.authNeeded);
+    });
+
+    test('authValid is false', function() {
+      assert.isFalse(element.authValid);
+    });
+
+  });
+  </script>
+</body>
+
 </html>

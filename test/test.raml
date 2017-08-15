@@ -14,6 +14,10 @@ types:
       firstname: string
       lastname: string
       title?: string
+    example:
+      firstname: Pawel
+      lastname: Psztyc
+      title: Mr
   Phone:
     type: string
     pattern: "^[0-9|-]+$" # defines pattern for the content of type `Phone`
@@ -52,9 +56,26 @@ securitySchemes:
         properties:
           id: number
           name: string
+  put:
+    body:
+      application/json:
+        type: Person
 /{orgId}:
   securedBy: basic
+  put:
+    body:
+      application/json:
+        type: Org
   get:
+    queryParameters:
+      test:
+        type: string
+        default: test
+        example: test
+      optional:
+        type: string
+        required: false
+        example: optional-test
     responses:
       200:
         body:
