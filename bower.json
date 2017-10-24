@@ -1,7 +1,7 @@
 {
   "name": "raml-request-panel",
   "description": "The request panel view for the request defined as a RAML method",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "authors": [
     "The Advanced REST client authors <arc@mulesoft.com>"
   ],
