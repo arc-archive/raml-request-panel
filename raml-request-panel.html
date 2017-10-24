@@ -234,6 +234,33 @@ This property will be propagated to all sub-elements that uses this property to 
       font-weight: var(--raml-request-panel-navigation-title-font-weight, 500);
     }
 
+    h2 {
+      @apply(--paper-font-subhead);
+      margin: 8px 12px;
+      font-weight: var(--raml-request-panel-navigation-title-font-weight, 500);
+      @apply --raml-request-panel-popup-header;
+    }
+
+    .buttons {
+      @apply --raml-request-panel-popup-btn-container;
+    }
+
+    [dialog-confirm] {
+      @apply --raml-request-panel-popup-btn-confirm;
+    }
+
+    [dialog-confirm]:hover {
+      @apply --raml-request-panel-popup-btn-confirm-hover;
+    }
+
+    [dialog-dismiss] {
+      @apply --raml-request-panel-popup-btn-dismiss;
+    }
+
+    [dialog-dismiss]:hover {
+      @apply --raml-request-panel-popup-btn-dismiss-hover;
+    }
+
     *[hidden] {
       display: none !important;
     }
