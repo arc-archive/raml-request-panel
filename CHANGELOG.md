@@ -1,3 +1,17 @@
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/advanced-rest-client/raml-request-panel/compare/0.2.5...0.3.1) (2017-10-25)
+
+
+### Breaking
+
+* Changes for https://github.com/mulesoft/api-console/issues/535 ([6c038f941c0d3cb666b40b27f90b7540ff3623d4](https://github.com/advanced-rest-client/raml-request-panel/commit/6c038f941c0d3cb666b40b27f90b7540ff3623d4))
+
+### Update
+
+* Updated dependencies version. ([6c07f34a17bfb7b4b68016979ea934b47844c18c](https://github.com/advanced-rest-client/raml-request-panel/commit/6c07f34a17bfb7b4b68016979ea934b47844c18c))
+
+
+
 <a name="0.2.5"></a>
 ## [0.2.5](https://github.com/advanced-rest-client/raml-request-panel/compare/0.2.4...0.2.5) (2017-10-24)
 

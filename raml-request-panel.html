@@ -33,6 +33,7 @@ the License.
 <link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../raml-request-parameters-editor/raml-request-parameters-model.html">
 <link rel="import" href="raml-request-panel-simple-xhr.html">
 <!--
 The request panel view for the request defined as a RAML method.
@@ -310,7 +311,7 @@ This property will be propagated to all sub-elements that uses this property to 
     paper-spinner {
       margin-right: 8px;
     }
-      
+
     paper-dialog {
       @apply(--raml-request-panel-popup);
     }
@@ -327,9 +328,11 @@ This property will be propagated to all sub-elements that uses this property to 
     }
     </style>
     <iron-media-query query="(max-width: [[narrowWidth]])" query-matches="{{narrow}}"></iron-media-query>
+    <raml-request-parameters-model query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" query-model="{{queryModel}}" uri-model="{{uriModel}}" has-query-parameters="{{hasQueryParameters}}" has-uri-parameters="{{hasUriParameters}}" has-parameters="{{hasParameters}}"></raml-request-parameters-model>
+
     <div class="content">
       <div class="url-editor" hidden$="[[noUrlEditor]]">
-        <raml-request-url-editor auto-validate required uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}" invalid="{{urlInvalid}}" base-uri="[[baseUri]]"></raml-request-url-editor>
+        <raml-request-url-editor auto-validate required value="{{url}}" invalid="{{urlInvalid}}" base-uri="[[_baseUri]]" endpoint-uri="[[method.relativeUri]]" query-model="[[queryModel]]" uri-model="[[uriModel]]"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
         <paper-tab hidden$="[[!authRequired]]">
@@ -342,7 +345,7 @@ This property will be propagated to all sub-elements that uses this property to 
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
         <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]" is-required="{{authRequired}}"></authorization-panel>
-        <raml-request-parameters-editor query-parameters="[[method.queryParameters]]" uri-parameters="[[method.allUriParameters]]" url="[[method.absoluteUri]]" value="{{url}}"></raml-request-parameters-editor>
+        <raml-request-parameters-editor query-model="[[queryModel]]" uri-model="[[uriModel]]" has-query-parameters="[[hasQueryParameters]]" has-uri-parameters="[[hasUriParameters]]" has-parameters="[[hasParameters]]"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
       </iron-pages>
@@ -575,13 +578,29 @@ This property will be propagated to all sub-elements that uses this property to 
        * is passed to the URL editor that prefixes the URL with `baseUri` value
        * if passed URL is a relative URL.
        */
-      baseUri: String
+      baseUri: {
+        type: String,
+        observer: '_baseUriChanged'
+      },
+      // Computed baseUri value passed to the URL editor.
+      _baseUri: String,
+      // Computed model for query parameters
+      queryModel: Object,
+      // Computed model for URI parameters
+      uriModel: Object,
+      // Computed value from the parameters model
+      hasUriParameters: Boolean,
+      // Computed value from the parameters model
+      hasQueryParameters: Boolean,
+      // Computed value from the parameters model
+      hasParameters: Boolean
     },
 
     observers: [
       '_isPayloadRequestChanged(isPayloadRequest)',
       '_authRequiredChanged(authRequired)',
-      '_selectedTabChanged(selectedTab)'
+      '_selectedTabChanged(selectedTab)',
+      '_methodBaseUriChanged(method.baseUri)'
     ],
 
     listeners: {
@@ -798,6 +817,28 @@ This property will be propagated to all sub-elements that uses this property to 
     _selectedTabChanged: function(selectedTab) {
       if (selectedTab === 3) {
         this.$$('raml-body-editor-panel').notifyResize();
+      }
+    },
+    /**
+     * Sets the `_baseUri` property to the RAML method `baseUri` only if
+     * `baseUri` property is not set.
+     *
+     * @param {String} methodBaseUri RAML method base URI.
+     */
+    _methodBaseUriChanged: function(methodBaseUri) {
+      if (this.baseUri) {
+        return;
+      }
+      this._baseUri = methodBaseUri;
+    },
+
+    _baseUriChanged: function(value) {
+      if (!value) {
+        if (this.method) {
+          this._baseUri = this.method.baseUri;
+        }
+      } else {
+        this._baseUri = value;
       }
     }
   });
