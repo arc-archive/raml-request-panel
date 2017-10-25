@@ -78,8 +78,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <h1>The raml-request-panel element</h1>
       <div main>
         <template is="dom-if" if="[[isMethod]]" restamp="true">
+          <div class="env-selector">
+            <label>Manually change base URI</label>
+            <select value="{{envUri::input}}">
+              <option value="">RAML base uri</option>
+              <option value="http://api.domain.com/{contextPath}/{contextSubPath}">http://api.domain.com/{contextPath}/{contextSubPath}</option>
+              <option value="api.domain.com/path/">api.domain.com/path/</option>
+            </select>
+          </div>
           <div class="demo-area">
-            <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]" loading-time="{{loadingTime}}" no-url-editor="[[noUrl]]"></raml-request-panel>
+            <raml-request-panel method="[[selected]]" narrow="[[narrow]]" response="{{response}}" response-error="{{responseError}}" redirect-url="[[redirectUrl]]" loading-time="{{loadingTime}}" no-url-editor="[[noUrl]]" base-uri="[[baseUri]]"></raml-request-panel>
           </div>
           <template is="dom-if" if="[[response.ok]]">
             <p>Request succeeded</p>
@@ -101,6 +109,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
   <script>
   (function(app) {
+    app.observers = [
+      '_envUriChanged(envUri)'
+    ];
+    app._envUriChanged = function(envUri) {
+      if (envUri) {
+        app.baseUri = envUri;
+      } else {
+        app.baseUri = undefined;
+      }
+    };
+
     var path = location.pathname;
     if (~path.indexOf('.html')) {
       path = path.substr(0, path.lastIndexOf('/') + 1);
