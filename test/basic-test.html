@@ -17,6 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="../../web-component-tester/browser.js"></script>
   <script src="../../iron-test-helpers/test-helpers.js"></script>
   <script src="../../iron-test-helpers/mock-interactions.js"></script>
+  <script src="helper.js"></script>
   <link rel="import" href="../../fetch-polyfill/fetch-polyfill.html">
   <link rel="import" href="../../raml-js-parser/raml-js-parser.html">
   <link rel="import" href="../../raml-json-enhance/raml-json-enhance.html">
@@ -40,34 +41,64 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
   <script>
-  /* global fixture, assert, TestHelpers, sinon */
-  suite('get-method', function() {
+  /* global fixture, assert, TestHelpers, sinon, RamlRequestTestHelper */
 
+  suite('basic', function() {
     var element;
-    var raml;
+    var method1;
+    var method2;
+
+    suiteSetup(function() {
+      this.timeout(120000);
+      return RamlRequestTestHelper.getTestRaml('test.raml')
+      .then(function(raml) {
+        method1 = raml.resources[0].methods[0];
+        method2 = raml.resources[1].methods[0];
+      });
+    });
+
+    setup(function() {
+      element = fixture('basic');
+      element.method = method1;
+      TestHelpers.forceXIfStamp(element);
+    });
+
+    test('_baseUri is computed from selected method', function() {
+      assert.equal(element._baseUri, method1.baseUri);
+    });
+
+    test('Setting "baseUri" overrides method "baseUri"', function() {
+      var uri = 'http://test.com/path';
+      element.baseUri = uri;
+      assert.equal(element._baseUri, uri);
+    });
+
+    test('Reseting method will not change _baseUri', function() {
+      var uri = 'http://test.com/path';
+      element.baseUri = uri;
+      element.method = method2;
+      assert.equal(element._baseUri, uri);
+    });
+
+    test('Clearing "baseUri resets original base uri"', function() {
+      var uri = 'http://test.com/path';
+      element.baseUri = uri;
+      element.method = method2;
+      element.baseUri = undefined;
+      assert.equal(element._baseUri, method2.baseUri);
+    });
+  });
+
+  suite('get-method', function() {
+    var element;
     var method;
 
-    suiteSetup(function(done) {
-      this.timeout(30000);
-      var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-      var parser = fixture('parser');
-      var enhancer = fixture('enhancer');
-      enhancer.addEventListener('raml-json-enhance-ready', function(e) {
-        raml = e.detail.json;
+    suiteSetup(function() {
+      this.timeout(120000);
+      return RamlRequestTestHelper.getTestRaml('test.raml')
+      .then(function(raml) {
         method = raml.resources[0].methods[0];
-        done();
       });
-      enhancer.addEventListener('error', function(e) {
-        e = new Error(e.message || 'Unknown error');
-        done(e);
-      });
-      parser.loadApi(baseUrl + 'test.raml')
-        .then(function(data) {
-          enhancer.json = data.json.specification;
-        })
-        .catch(function(e) {
-          done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
-        });
     });
 
     setup(function() {
@@ -130,32 +161,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   });
 
   suite('post-method', function() {
-
     var element;
-    var raml;
     var method;
 
-    suiteSetup(function(done) {
+    suiteSetup(function() {
       this.timeout(30000);
-      var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-      var parser = fixture('parser');
-      var enhancer = fixture('enhancer');
-      enhancer.addEventListener('raml-json-enhance-ready', function(e) {
-        raml = e.detail.json;
+      return RamlRequestTestHelper.getTestRaml('test.raml')
+      .then(function(raml) {
         method = raml.resources[0].methods[1];
-        done();
       });
-      enhancer.addEventListener('error', function(e) {
-        e = new Error(e.message || 'Unknown error');
-        done(e);
-      });
-      parser.loadApi(baseUrl + 'test.raml')
-        .then(function(data) {
-          enhancer.json = data.json.specification;
-        })
-        .catch(function(e) {
-          done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
-        });
     });
 
     setup(function() {
@@ -188,30 +202,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   suite('with authorization', function() {
 
     var element;
-    var raml;
     var method;
 
-    suiteSetup(function(done) {
+    suiteSetup(function() {
       this.timeout(30000);
-      var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
-      var parser = fixture('parser');
-      var enhancer = fixture('enhancer');
-      enhancer.addEventListener('raml-json-enhance-ready', function(e) {
-        raml = e.detail.json;
+      return RamlRequestTestHelper.getTestRaml('test.raml')
+      .then(function(raml) {
         method = raml.resources[1].methods[0];
-        done();
       });
-      enhancer.addEventListener('error', function(e) {
-        e = new Error(e.message || 'Unknown error');
-        done(e);
-      });
-      parser.loadApi(baseUrl + 'test.raml')
-        .then(function(data) {
-          enhancer.json = data.json.specification;
-        })
-        .catch(function(e) {
-          done(new Error('Parser error: ' + (e.message || 'Some error happened...')));
-        });
     });
 
     setup(function() {
