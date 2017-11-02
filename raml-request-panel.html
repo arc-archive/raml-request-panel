@@ -28,6 +28,7 @@ the License.
 <link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../authorization-panel/authorization-panel.html">
 <link rel="import" href="../oauth-authorization/oauth2-authorization.html">
+<link rel="import" href="../oauth-authorization/oauth1-authorization.html">
 <link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
 <link rel="import" href="../fetch-polyfill/fetch-polyfill.html">
 <link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
@@ -335,7 +336,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <raml-request-url-editor auto-validate required value="{{url}}" invalid="{{urlInvalid}}" base-uri="[[_baseUri]]" endpoint-uri="[[method.relativeUri]]" query-model="[[queryModel]]" uri-model="[[uriModel]]"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
-        <paper-tab hidden$="[[!authRequired]]">
+        <paper-tab hidden$="[[!noAuth]]">
           Authorization
           <iron-icon icon="arc:warning" class="panel-warning" hidden$="[[authValid]]" title="Fill up missing auth data"></iron-icon>
         </paper-tab>
@@ -344,7 +345,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
-        <authorization-panel hidden$="[[!authRequired]]" secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]" is-required="{{authRequired}}"></authorization-panel>
+        <authorization-panel hidden$="[[!noAuth]]" secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]" auth-required="{{authRequired}}" auth-valid="{{authValid}}"></authorization-panel>
         <raml-request-parameters-editor query-model="[[queryModel]]" uri-model="[[uriModel]]" has-query-parameters="[[hasQueryParameters]]" has-uri-parameters="[[hasUriParameters]]" has-parameters="[[hasParameters]]"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
@@ -352,25 +353,14 @@ This property will be propagated to all sub-elements that uses this property to 
       <div class="action-bar">
         <paper-spinner alt="Loading contacts list" active="[[loadingRequest]]"></paper-spinner>
         <span class="url-invalid-info" hidden$="[[!urlInvalid]]">Request URL is invalid.</span>
-        <paper-button class="action-button" on-tap="execute" hidden$="[[authNeeded]]" disabled="[[urlInvalid]]">Send</paper-button>
-        <div hidden$="[[!authNeeded]]">
+        <paper-button class="action-button" on-tap="execute" hidden$="[[!authValid]]" disabled="[[urlInvalid]]">Send</paper-button>
+        <template is="dom-if" if="[[!authValid]]">
           <paper-button class="action-button" on-tap="authAndExecute" disabled="[[urlInvalid]]">Authorize and send</paper-button>
-        </div>
+        </template>
       </div>
     </div>
-    <paper-dialog opened="[[authDialogOpened]]">
-      <h2>Authorization</h2>
-      <paper-dialog-scrollable>
-        <template is="dom-if" if="[[authDialogOpened]]" restamp>
-          <authorization-panel secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]"></authorization-panel>
-        </template>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss autofocus>Cancel</paper-button>
-        <paper-button dialog-confirm on-tap="_onAuthAndSend">Authorize</paper-button>
-      </div>
-    </paper-dialog>
     <oauth2-authorization></oauth2-authorization>
+    <oauth1-authorization></oauth1-authorization>
     <raml-request-panel-simple-xhr id="xhr"></raml-request-panel-simple-xhr>
     <paper-toast text="Authorization is required for this endpoint" id="authRequired" horizontal-align="right" horizontal-offset="12"></paper-toast>
     <paper-toast text="Fill in the authorization form first" id="authFormError" horizontal-align="right" horizontal-offset="12"></paper-toast>
@@ -411,7 +401,10 @@ This property will be propagated to all sub-elements that uses this property to 
        * A RAML node representing a method node in RAML definition.
        * It should be obtained from the `raml-path-to-object` element.
        */
-      method: Object,
+      method: {
+        type: Object,
+        observer: '_methodChanged'
+      },
       // Selected request tab.
       selectedTab: {
         type: Number,
@@ -532,35 +525,21 @@ This property will be propagated to all sub-elements that uses this property to 
         notify: true,
         readOnly: true
       },
-      // Computed value if current method is secured
+      // Received from the authorization panel state if authorization is required
       authRequired: Boolean,
+      // Received from the authorization panel state if authorization data is valid
+      authValid: Boolean,
       // OAuth2 redirect URL
       redirectUrl: String,
       // Selected by the user auth method (if any)
       authMethod: String,
       // Current authorization settings.
       authSettings: Object,
-      // If true then the authorization panel passed validation and auth data are set.
-      authValid: Boolean,
-      /**
-       * Computes if all data required for authorization are set.
-       * It check for the `authValid` property as a native form validation and in case of OAuth2
-       * for token information. If the token is not set then the auth is still invalid.
-       */
-      authNeeded: {
-        type: Boolean,
-        value: false,
-        // jscs: disable
-        computed: '_computeAuthNeeded(authRequired,authValid,authMethod,authSettings)'
-        // jscs: enable
-      },
       /**
        * Computed value when the URL change.
        * If not valid form submission won't be possible.
        */
-      urlInvalid: {
-        type: Boolean
-      },
+      urlInvalid: Boolean,
       /**
        * Hides the URL editor from the view.
        * The editor is still in the DOM and the `urlInvalid` property still will be set.
@@ -593,12 +572,21 @@ This property will be propagated to all sub-elements that uses this property to 
       // Computed value from the parameters model
       hasQueryParameters: Boolean,
       // Computed value from the parameters model
-      hasParameters: Boolean
+      hasParameters: Boolean,
+      /**
+       * Value computed when RAML method change.
+       * It is set to true when authorization is not defined for current
+       * endpoint's method.
+       */
+      noAuth: {
+        type: Boolean,
+        readOnly: true
+      }
     },
 
     observers: [
       '_isPayloadRequestChanged(isPayloadRequest)',
-      '_authRequiredChanged(authRequired)',
+      '_noAuthChanged(noAuth)',
       '_selectedTabChanged(selectedTab)',
       '_methodBaseUriChanged(method.baseUri)'
     ],
@@ -613,6 +601,35 @@ This property will be propagated to all sub-elements that uses this property to 
 
     detached: function() {
       this.unlisten(window, 'api-console-response', '_responseHandler');
+    },
+    // Called when RAML method definition changed.
+    _methodChanged: function(method) {
+      this._updateAuthorizationState(method);
+    },
+
+    /**
+     * Updates `noAuth` property depending on number of security schemes
+     * defined in RAML for this method.
+     *
+     * @param {Object} ramlMethod RAML method definition.
+     */
+    _updateAuthorizationState: function(ramlMethod) {
+      var state = false;
+      if (ramlMethod && ramlMethod.securedBy && ramlMethod.securedBy.length) {
+        var methods = [];
+        var allowed = ['Digest Authentication', 'Basic Authentication',
+          'OAuth 1.0', 'OAuth 2.0', 'x-custom'];
+        ramlMethod.securedBy.forEach(function(item) {
+          if (!item) {
+            return;
+          }
+          if (allowed.indexOf(item.type) !== -1) {
+            methods.push(item.type);
+          }
+        });
+        state = methods.length > 0;
+      }
+      this._setNoAuth(state);
     },
 
     // Computes boolean value if the selected object (method) can carry a payload
@@ -638,11 +655,11 @@ This property will be propagated to all sub-elements that uses this property to 
       }
       tabs.notifyResize();
     },
-
-    _authRequiredChanged: function(required) {
-      if (required && this.selectedTab === 2) {
+    // Handler for `noAuth` property change.
+    _noAuthChanged: function(noAuth) {
+      if (!noAuth && this.selectedTab === 2) {
         this.selectedTab = 0;
-      } else if (!required && this.selectedTab === 0) {
+      } else if (noAuth && this.selectedTab === 0) {
         this.selectedTab = 1;
       }
       var tabs = this.$$('paper-tabs');
@@ -678,45 +695,16 @@ This property will be propagated to all sub-elements that uses this property to 
      * request.
      */
     authAndExecute: function() {
-      if (this.selectedTab === 0) {
-        this.$.authFormError.opened = true;
-        return;
-      }
-      this.authDialogOpened = true;
-    },
-    /**
-     * Handler for "authorize" button click in the authorization dialog.
-     * If nescessary it will signal OAuth token request and wait until
-     * the token is ready before executing the request.
-     */
-    _onAuthAndSend: function() {
-      if (!this.authValid) {
-        this.$.authRequired.opened = true;
-        return;
-      }
-      var callSend = false;
-      switch (this.authMethod) {
-        case 'oauth2':
-          if (!this.authSettings || !this.authSettings.tokenValue) {
-            this.fire('oauth2-token-requested', this.authSettings);
-          } else {
-            callSend = true;
-          }
-          break;
-        case 'basic':
-          if (!this.authSettings || !this.authSettings.hash) {
-            this.$.authRequired.opened = true;
-            return;
-          } else {
-            callSend = true;
-          }
-          break;
-      }
-      if (callSend) {
-        this.execute();
-      } else {
+      if (this.authMethod === 'oauth1' || this.authMethod === 'oauth2') {
+        var panel = this.$$('authorization-panel');
+        panel.forceTokenAuthorization();
         this.__pendingRequest = true;
+        return;
       }
+      if (this.selectedTab !== 0) {
+        this.selectedTab = 0;
+      }
+      this.$.authFormError.opened = true;
     },
     /**
      * Returns an object with the request properties.
@@ -790,26 +778,10 @@ This property will be propagated to all sub-elements that uses this property to 
     _authSettingsChanged: function(e) {
       this.authMethod = e.detail.type;
       this.authSettings = e.detail.settings;
-      this.set('authValid', e.detail.valid);
       if (this.__pendingRequest) {
         this.__pendingRequest = false;
         this.execute();
       }
-    },
-
-    _computeAuthNeeded: function(required, authValid, authMethod, settings) {
-      if (!required) {
-        return false;
-      }
-      if (!authValid) {
-        return true;
-      }
-      if (authMethod === 'oauth2') {
-        if (!settings.tokenValue) {
-          return true;
-        }
-      }
-      return false;
     },
     /**
      * Updates the body editor if selected.
