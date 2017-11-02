@@ -44,201 +44,178 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   /* global fixture, assert, TestHelpers, sinon, RamlRequestTestHelper */
 
   suite('basic', function() {
-    var element;
-    var method1;
-    var method2;
-
+    var raml;
     suiteSetup(function() {
       this.timeout(120000);
       return RamlRequestTestHelper.getTestRaml('test.raml')
-      .then(function(raml) {
+      .then(function(data) {
+        raml = data;
+      });
+    });
+
+    suite('basic', function() {
+      var element;
+      var method1;
+      var method2;
+
+      setup(function() {
         method1 = raml.resources[0].methods[0];
         method2 = raml.resources[1].methods[0];
+
+        element = fixture('basic');
+        element.method = method1;
+        TestHelpers.forceXIfStamp(element);
+      });
+
+      test('_baseUri is computed from selected method', function() {
+        assert.equal(element._baseUri, method1.baseUri);
+      });
+
+      test('Setting "baseUri" overrides method "baseUri"', function() {
+        var uri = 'http://test.com/path';
+        element.baseUri = uri;
+        assert.equal(element._baseUri, uri);
+      });
+
+      test('Reseting method will not change _baseUri', function() {
+        var uri = 'http://test.com/path';
+        element.baseUri = uri;
+        element.method = method2;
+        assert.equal(element._baseUri, uri);
+      });
+
+      test('Clearing "baseUri resets original base uri"', function() {
+        var uri = 'http://test.com/path';
+        element.baseUri = uri;
+        element.method = method2;
+        element.baseUri = undefined;
+        assert.equal(element._baseUri, method2.baseUri);
+      });
+
+      test('noAuth is computed', function() {
+        assert.isTrue(element.noAuth);
       });
     });
 
-    setup(function() {
-      element = fixture('basic');
-      element.method = method1;
-      TestHelpers.forceXIfStamp(element);
+    suite('get-method', function() {
+      var element;
+
+      setup(function() {
+        element = fixture('basic');
+        element.method = raml.resources[0].methods[0];
+        TestHelpers.forceXIfStamp(element);
+      });
+
+      test('isPayloadRequest is false', function() {
+        assert.isFalse(element.isPayloadRequest);
+      });
+
+      test('authRequired is false', function() {
+        assert.isFalse(element.authRequired);
+      });
+
+      test('selectedTab is 1', function() {
+        assert.equal(element.selectedTab, 1);
+      });
+
+      test('Serializes the request', function() {
+        var serialized = element.serializeRequest();
+        assert.equal(serialized.method, 'GET', 'Method is set');
+        assert.equal(serialized.url, element.method.absoluteUri, 'URL is set');
+        assert.equal(serialized.headers, '', 'Headers are empty');
+        assert.isFalse(!!serialized.payload, 'Payload is empty');
+      });
+
+      test('Should fire `api-console-request` event', function() {
+        var spy = sinon.stub();
+        element.addEventListener('api-console-request', spy);
+        element.execute();
+        assert.isTrue(spy.calledOnce);
+      });
+
+      test('The `api-console-request` event has request details', function(done) {
+        element.addEventListener('api-console-request', function(e) {
+          e.preventDefault();
+
+          var req = e.detail;
+          assert.equal(req.method, 'GET', 'Method is set');
+          assert.equal(req.url, element.method.absoluteUri, 'URL is set');
+          assert.equal(req.headers, '', 'Headers are empty');
+          assert.isFalse(!!req.payload, 'Payload is empty');
+
+          done();
+        });
+        element.execute();
+      });
+      // Safari uses URL class polyfill and this URL is valid according to this
+      // class.
+      // TODO: Fix this issue.
+      // test('Send request button is disabled when url is invalid', function() {
+      //   element.url = '/test';
+      //   forceXIfStamp(element);
+      //   assert.isTrue(element.urlInvalid);
+      //   var button = Polymer.dom(element.root).querySelector('.action-button');
+      //   assert.isTrue(button.disabled);
+      // });
     });
 
-    test('_baseUri is computed from selected method', function() {
-      assert.equal(element._baseUri, method1.baseUri);
-    });
+    suite('post-method', function() {
+      var element;
 
-    test('Setting "baseUri" overrides method "baseUri"', function() {
-      var uri = 'http://test.com/path';
-      element.baseUri = uri;
-      assert.equal(element._baseUri, uri);
-    });
+      setup(function() {
+        element = fixture('basic');
+        element.method = raml.resources[0].methods[1];
+        TestHelpers.forceXIfStamp(element);
+      });
 
-    test('Reseting method will not change _baseUri', function() {
-      var uri = 'http://test.com/path';
-      element.baseUri = uri;
-      element.method = method2;
-      assert.equal(element._baseUri, uri);
-    });
+      test('isPayloadRequest is true', function() {
+        assert.isTrue(element.isPayloadRequest);
+      });
 
-    test('Clearing "baseUri resets original base uri"', function() {
-      var uri = 'http://test.com/path';
-      element.baseUri = uri;
-      element.method = method2;
-      element.baseUri = undefined;
-      assert.equal(element._baseUri, method2.baseUri);
-    });
+      test('noAuth is computed', function() {
+        assert.isFalse(element.noAuth);
+      });
 
-    test('noAuth is computed', function() {
-      assert.isTrue(element.noAuth);
-    });
-  });
+      test('Auto add content type', function() {
+        assert.equal(element.headers,
+          'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json');
+      });
 
-  suite('get-method', function() {
-    var element;
-    var method;
-
-    suiteSetup(function() {
-      this.timeout(120000);
-      return RamlRequestTestHelper.getTestRaml('test.raml')
-      .then(function(raml) {
-        method = raml.resources[0].methods[0];
+      test('Should serialize request', function() {
+        var result = element.serializeRequest();
+        assert.equal(result.method, 'POST', 'Method is set');
+        assert.equal(result.url, 'http://raml-test.domain.com/people?booleanToken=true',
+        'URL is set');
+        assert.equal(result.headers,
+          'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json',
+          'Headers are set');
+        assert.isFalse(!!result.payload, 'Payload is empty');
       });
     });
 
-    setup(function() {
-      element = fixture('basic');
-      element.method = method;
-      TestHelpers.forceXIfStamp(element);
-    });
+    suite('with authorization', function() {
+      var element;
 
-    test('isPayloadRequest is false', function() {
-      assert.isFalse(element.isPayloadRequest);
-    });
-
-    test('authRequired is false', function() {
-      assert.isFalse(element.authRequired);
-    });
-
-    test('selectedTab is 1', function() {
-      assert.equal(element.selectedTab, 1);
-    });
-
-    test('Serializes the request', function() {
-      var serialized = element.serializeRequest();
-      assert.equal(serialized.method, 'GET', 'Method is set');
-      assert.equal(serialized.url, element.method.absoluteUri, 'URL is set');
-      assert.equal(serialized.headers, '', 'Headers are empty');
-      assert.isFalse(!!serialized.payload, 'Payload is empty');
-    });
-
-    test('Should fire `api-console-request` event', function() {
-      var spy = sinon.stub();
-      element.addEventListener('api-console-request', spy);
-      element.execute();
-      assert.isTrue(spy.calledOnce);
-    });
-
-    test('The `api-console-request` event has request details', function(done) {
-      element.addEventListener('api-console-request', function(e) {
-        e.preventDefault();
-
-        var req = e.detail;
-        assert.equal(req.method, 'GET', 'Method is set');
-        assert.equal(req.url, element.method.absoluteUri, 'URL is set');
-        assert.equal(req.headers, '', 'Headers are empty');
-        assert.isFalse(!!req.payload, 'Payload is empty');
-
-        done();
+      setup(function() {
+        element = fixture('basic');
+        element.method = raml.resources[0].methods[1];
+        TestHelpers.forceXIfStamp(element);
       });
-      element.execute();
-    });
-    // Safari uses URL class polyfill and this URL is valid according to this
-    // class.
-    // TODO: Fix this issue.
-    // test('Send request button is disabled when url is invalid', function() {
-    //   element.url = '/test';
-    //   forceXIfStamp(element);
-    //   assert.isTrue(element.urlInvalid);
-    //   var button = Polymer.dom(element.root).querySelector('.action-button');
-    //   assert.isTrue(button.disabled);
-    // });
-  });
 
-  suite('post-method', function() {
-    var element;
-    var method;
-
-    suiteSetup(function() {
-      this.timeout(30000);
-      return RamlRequestTestHelper.getTestRaml('test.raml')
-      .then(function(raml) {
-        method = raml.resources[0].methods[1];
+      test('noAuth is false', function() {
+        assert.isFalse(element.noAuth);
       });
-    });
 
-    setup(function() {
-      element = fixture('basic');
-      element.method = method;
-      TestHelpers.forceXIfStamp(element);
-    });
-
-    test('isPayloadRequest is true', function() {
-      assert.isTrue(element.isPayloadRequest);
-    });
-
-    test('noAuth is computed', function() {
-      assert.isFalse(element.noAuth);
-    });
-
-    test('Auto add content type', function() {
-      assert.equal(element.headers,
-        'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json');
-    });
-
-    test('Should serialize request', function() {
-      var result = element.serializeRequest();
-      assert.equal(result.method, 'POST', 'Method is set');
-      assert.equal(result.url, 'http://raml-test.domain.com/people?booleanToken=true',
-      'URL is set');
-      assert.equal(result.headers,
-        'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json',
-        'Headers are set');
-      assert.isFalse(!!result.payload, 'Payload is empty');
-    });
-  });
-
-  suite('with authorization', function() {
-
-    var element;
-    var method;
-
-    suiteSetup(function() {
-      this.timeout(30000);
-      return RamlRequestTestHelper.getTestRaml('test.raml')
-      .then(function(raml) {
-        method = raml.resources[0].methods[1];
+      test('authRequired is true', function() {
+        assert.isTrue(element.authRequired);
       });
-    });
 
-    setup(function() {
-      element = fixture('basic');
-      element.method = method;
-      TestHelpers.forceXIfStamp(element);
-    });
-
-    test('noAuth is false', function() {
-      assert.isFalse(element.noAuth);
-    });
-
-    test('authRequired is true', function() {
-      assert.isTrue(element.authRequired);
-    });
-
-    test('authValid is false', function(done) {
-      setTimeout(function() {
-        assert.isFalse(element.authValid);
-        done();
-      }, 5);
+      test('authValid is false', function(done) {
+        setTimeout(function() {
+          assert.isFalse(element.authValid);
+          done();
+        }, 5);
+      });
     });
   });
   </script>
