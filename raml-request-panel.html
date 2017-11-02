@@ -395,6 +395,9 @@ This property will be propagated to all sub-elements that uses this property to 
      * @param {String} url Endpoint's URL
      * @param {String} headers A HTTP headers string (as defined in the spec)
      * @param {String} payload A message body (encoded if necessary).
+     * @param {Object} auth Collected authorization data. In most cases it is
+     * unused. It is required for OAuth1 to pass this data to handle request signing
+     * by the `oauth-authorization` element.
      */
     properties: {
       /**
@@ -729,6 +732,9 @@ This property will be propagated to all sub-elements that uses this property to 
         headers: this.headers,
         payload: this.payload
       };
+      if (this.authMethod && this.authSettings) {
+        result.auth = this.authSettings;
+      }
       return result;
     },
 
