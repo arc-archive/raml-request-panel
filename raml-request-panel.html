@@ -336,7 +336,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <raml-request-url-editor auto-validate required value="{{url}}" invalid="{{urlInvalid}}" base-uri="[[_baseUri]]" endpoint-uri="[[method.relativeUri]]" query-model="[[queryModel]]" uri-model="[[uriModel]]"></raml-request-url-editor>
       </div>
       <paper-tabs selected="{{selectedTab}}">
-        <paper-tab hidden$="[[!noAuth]]">
+        <paper-tab hidden$="[[noAuth]]">
           Authorization
           <iron-icon icon="arc:warning" class="panel-warning" hidden$="[[authValid]]" title="Fill up missing auth data"></iron-icon>
         </paper-tab>
@@ -345,7 +345,7 @@ This property will be propagated to all sub-elements that uses this property to 
         <paper-tab hidden$="[[!isPayloadRequest]]">Body</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
-        <authorization-panel hidden$="[[!noAuth]]" secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]" auth-required="{{authRequired}}" auth-valid="{{authValid}}"></authorization-panel>
+        <authorization-panel hidden$="[[noAuth]]" secured-by="[[method.securedBy]]" redirect-url="[[redirectUrl]]" auth-required="{{authRequired}}" auth-valid="{{authValid}}"></authorization-panel>
         <raml-request-parameters-editor query-model="[[queryModel]]" uri-model="[[uriModel]]" has-query-parameters="[[hasQueryParameters]]" has-uri-parameters="[[hasUriParameters]]" has-parameters="[[hasParameters]]"></raml-request-parameters-editor>
         <raml-request-headers-editor narrow="[[narrow]]" raml-headers="[[method.headers]]" content-type="{{contentType}}" is-payload="[[isPayloadRequest]]" value="{{headers}}"></raml-request-headers-editor>
         <raml-body-editor-panel narrow="[[narrow]]" body="[[method.body]]" hidden$="[[!isPayloadRequest]]" content-type="{{contentType}}" value="{{payload}}"></raml-body-editor-panel>
@@ -580,7 +580,8 @@ This property will be propagated to all sub-elements that uses this property to 
        */
       noAuth: {
         type: Boolean,
-        readOnly: true
+        readOnly: true,
+        value: true
       }
     },
 
@@ -614,7 +615,7 @@ This property will be propagated to all sub-elements that uses this property to 
      * @param {Object} ramlMethod RAML method definition.
      */
     _updateAuthorizationState: function(ramlMethod) {
-      var state = false;
+      var state = true;
       if (ramlMethod && ramlMethod.securedBy && ramlMethod.securedBy.length) {
         var methods = [];
         var allowed = ['Digest Authentication', 'Basic Authentication',
@@ -627,7 +628,7 @@ This property will be propagated to all sub-elements that uses this property to 
             methods.push(item.type);
           }
         });
-        state = methods.length > 0;
+        state = methods.length < 1;
       }
       this._setNoAuth(state);
     },
@@ -640,6 +641,16 @@ This property will be propagated to all sub-elements that uses this property to 
       }
       return ['get', 'head'].indexOf(base.method) === -1;
     },
+    /**
+     * Refreshes tabs selection. To be called when number of tabs changes.
+     */
+    _refreshTabs: function() {
+      var tabs = this.$$('paper-tabs');
+      if (!tabs) {
+        return;
+      }
+      tabs.notifyResize();
+    },
 
     _isPayloadRequestChanged: function(required) {
       if (!required && this.selectedTab === 3) {
@@ -649,11 +660,7 @@ This property will be propagated to all sub-elements that uses this property to 
           this.selectedTab = 1;
         }
       }
-      var tabs = this.$$('paper-tabs');
-      if (!tabs) {
-        return;
-      }
-      tabs.notifyResize();
+      this._refreshTabs();
     },
     // Handler for `noAuth` property change.
     _noAuthChanged: function(noAuth) {
@@ -662,11 +669,7 @@ This property will be propagated to all sub-elements that uses this property to 
       } else if (noAuth && this.selectedTab === 0) {
         this.selectedTab = 1;
       }
-      var tabs = this.$$('paper-tabs');
-      if (!tabs) {
-        return;
-      }
-      tabs.notifyResize();
+      this._refreshTabs();
     },
     /**
      * Execute the request with current settings.
