@@ -87,6 +87,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       element.baseUri = undefined;
       assert.equal(element._baseUri, method2.baseUri);
     });
+
+    test('noAuth is computed', function() {
+      assert.isTrue(element.noAuth);
+    });
   });
 
   suite('get-method', function() {
@@ -182,19 +186,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       assert.isTrue(element.isPayloadRequest);
     });
 
-    test('authRequired is false', function() {
-      assert.isFalse(element.authRequired);
+    test('noAuth is computed', function() {
+      assert.isFalse(element.noAuth);
     });
 
     test('Auto add content type', function() {
-      assert.equal(element.headers, 'Content-Type: application/json');
+      assert.equal(element.headers,
+        'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json');
     });
 
     test('Should serialize request', function() {
       var result = element.serializeRequest();
       assert.equal(result.method, 'POST', 'Method is set');
-      assert.equal(result.url, element.method.absoluteUri, 'URL is set');
-      assert.equal(result.headers, 'Content-Type: application/json', 'Headers are set');
+      assert.equal(result.url, 'http://raml-test.domain.com/people?booleanToken=true',
+      'URL is set');
+      assert.equal(result.headers,
+        'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json',
+        'Headers are set');
       assert.isFalse(!!result.payload, 'Payload is empty');
     });
   });
@@ -208,7 +216,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.timeout(30000);
       return RamlRequestTestHelper.getTestRaml('test.raml')
       .then(function(raml) {
-        method = raml.resources[1].methods[0];
+        method = raml.resources[0].methods[1];
       });
     });
 
@@ -218,18 +226,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       TestHelpers.forceXIfStamp(element);
     });
 
+    test('noAuth is false', function() {
+      assert.isFalse(element.noAuth);
+    });
+
     test('authRequired is true', function() {
       assert.isTrue(element.authRequired);
     });
 
-    test('authNeeded is true', function() {
-      assert.isTrue(element.authNeeded);
+    test('authValid is false', function(done) {
+      setTimeout(function() {
+        assert.isFalse(element.authValid);
+        done();
+      }, 5);
     });
-
-    test('authValid is false', function() {
-      assert.isFalse(element.authValid);
-    });
-
   });
   </script>
 </body>

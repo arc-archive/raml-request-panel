@@ -36,6 +36,7 @@ types:
     properties:
       phone: Phone # inherits all properties from type `Phone`; uses shortcut syntax
   Alertable: Manager | AlertableAdmin # union type; either a `Manager` or `AlertableAdmin`
+
 securitySchemes:
   basic:
     description: |
@@ -131,7 +132,7 @@ securitySchemes:
           application/json:
             type: Person[]
   post:
-    securedBy: [null, digest, oauth1, x-other, x-test1, oauth2, basic]
+    securedBy: [basic, digest, oauth1, x-other, x-test1, oauth2]
     body:
       application/json:
         type: object
