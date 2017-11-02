@@ -1,3 +1,25 @@
+<a name="0.5.1"></a>
+## [0.5.1](https://github.com/advanced-rest-client/raml-request-panel/compare/0.3.2...0.5.1) (2017-11-02)
+
+
+### Fix
+
+* Fixed template IF conditions ([a048038a8a0b1dc95a1732ed5bb9f87fb34837c0](https://github.com/advanced-rest-client/raml-request-panel/commit/a048038a8a0b1dc95a1732ed5bb9f87fb34837c0))
+
+### Update
+
+* Added auth property to the request event. ([f5883253fb3dac33ed218bd0e2f700a779cecdf7](https://github.com/advanced-rest-client/raml-request-panel/commit/f5883253fb3dac33ed218bd0e2f700a779cecdf7))
+* Removed unused property ([9ac26d38b13551b671d2f50c4cde63fe00d9fb32](https://github.com/advanced-rest-client/raml-request-panel/commit/9ac26d38b13551b671d2f50c4cde63fe00d9fb32))
+* Speeded up the test so IE can catch up ([d722b1fc4b28d0abab36259aa7f7336f8d1925e8](https://github.com/advanced-rest-client/raml-request-panel/commit/d722b1fc4b28d0abab36259aa7f7336f8d1925e8))
+* Updated demo page and raml examples ([d01eb45d3b170376453a94b8900cbc703b94194d](https://github.com/advanced-rest-client/raml-request-panel/commit/d01eb45d3b170376453a94b8900cbc703b94194d))
+* Updated tests for new API ([1d7559905b0214b60339cd70e074fd54c6239bf9](https://github.com/advanced-rest-client/raml-request-panel/commit/1d7559905b0214b60339cd70e074fd54c6239bf9))
+
+### Uppadate
+
+* Updates elements versions and adjusted element to new API. ([71a09121adf97dab2655fd4bf3a602ef33e34f4a](https://github.com/advanced-rest-client/raml-request-panel/commit/71a09121adf97dab2655fd4bf3a602ef33e34f4a))
+
+
+
 <a name="0.3.2"></a>
 ## [0.3.2](https://github.com/advanced-rest-client/raml-request-panel/compare/0.3.1...0.3.2) (2017-10-25)
 
