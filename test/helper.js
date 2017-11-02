@@ -3,6 +3,7 @@ var RamlRequestTestHelper = {};
 RamlRequestTestHelper.getTestRaml = function(file) {
   return new Promise(function(resolve, reject) {
     var baseUrl = location.href.substr(0, location.href.lastIndexOf('/') + 1);
+    baseUrl = baseUrl.replace('test', 'demo');
     var parser = fixture('parser');
     var enhancer = fixture('enhancer');
     enhancer.addEventListener('raml-json-enhance-ready', function(e) {

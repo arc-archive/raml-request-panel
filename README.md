@@ -182,6 +182,7 @@ This property will be propagated to all sub-elements that uses this property to 
 url **String** - Endpoint's URL |
 headers **String** - A HTTP headers string (as defined in the spec) |
 payload **String** - A message body (encoded if necessary). |
+auth **Object** - Collected authorization data. In most cases it is unused. It is required for OAuth1 to pass this data to handle request signing by the `oauth-authorization` element. |
 | api-console-response-ready | Fired when the response has been recorded and request, response, redirects and timings data are set. | isXhr **Boolean** - True if the transport method is a basic transport. |
 response **Response** - The response object |
 responseError **Error** - Error object if the response is errored |

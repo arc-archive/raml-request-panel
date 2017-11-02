@@ -1,7 +1,7 @@
 {
   "name": "raml-request-panel",
   "description": "The request panel view for the request defined as a RAML method",
-  "version": "0.3.2",
+  "version": "0.5.1",
   "authors": [
     "The Advanced REST client authors <arc@mulesoft.com>"
   ],
@@ -41,8 +41,8 @@
     "paper-progress": "PolymerElements/paper-progress#^1.0.11",
     "raml-body-editor-panel": "advanced-rest-client/raml-body-editor-panel#^0.3.1",
     "app-layout": "PolymerElements/app-layout#^0.10.6",
-    "authorization-panel": "advanced-rest-client/authorization-panel#^0.5.1",
-    "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.2",
+    "authorization-panel": "advanced-rest-client/authorization-panel#^0.6.3",
+    "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.2.3",
     "fetch-polyfill": "advanced-rest-client/fetch-polyfill#^0.1.1",
     "paper-spinner": "PolymerElements/paper-spinner#^1.2.1",
     "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",
@@ -62,7 +62,6 @@
     "paper-listbox": "polymerelements/paper-listbox#^1.1.2",
     "paper-item": "polymerelements/paper-item#^1.2.1",
     "paper-dropdown-menu": "polymerelements/paper-dropdown-menu#^1.4.3",
-    "oauth-authorization": "advanced-rest-client/oauth-authorization#^0.1.5",
     "raml-js-parser": "advanced-rest-client/raml-js-parser#^2.0.0",
     "api-console-ext-comm": "advanced-rest-client/api-console-ext-comm#^0.1.1"
   },

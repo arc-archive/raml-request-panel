@@ -66,13 +66,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   raml-request-panel {
     max-width: 700px;
   }
-
   </style>
 </head>
 <body unresolved>
   <template is="dom-bind">
     <raml-demo-page selected-object="{{selected}}" narrow="{{narrow}}" is-method="{{isMethod}}">
-      <paper-item data-url$="[[testRaml]]">Test case with RAML 1.0</paper-item>
+      <paper-item data-url$="[[testRaml]]">Test case #1</paper-item>
+      <paper-item data-url$="[[testRaml2]]">Test case #2</paper-item>
       <paper-item data-url="https://cdn.rawgit.com/advanced-rest-client/echo-advancedrestclient-com/master/api/api.raml">ARC Echo service</paper-item>
       <paper-item main-menu class="checkable-menu"><paper-item-body>No URL editor</paper-item-body><paper-checkbox checked="{{noUrl}}"></paper-checkbox></paper-item>
       <h1>The raml-request-panel element</h1>
@@ -124,8 +124,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     if (~path.indexOf('.html')) {
       path = path.substr(0, path.lastIndexOf('/') + 1);
     }
-    var ramlRoot = location.protocol + '//' + location.host + path.replace('demo', 'test');
+    var ramlRoot = location.protocol + '//' + location.host + path;
     app.testRaml = ramlRoot + 'test.raml';
+    app.testRaml2 = ramlRoot + 'raml-test-1/ultimate-open-weather.raml';
+
     var redirectUrl = location.href.replace(/\/raml-request-panel\/demo(\/)?(index.html)?/,
       '/oauth-authorization/oauth-popup.html');
     app.redirectUrl = redirectUrl;

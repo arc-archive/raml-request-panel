@@ -1,0 +1,180 @@
+#%RAML 1.0
+title: My API with Types
+mediaType: application/json
+baseUri: http://raml-test.domain.com
+types:
+  Org:
+    type: object
+    properties:
+      onCall: Alertable # inherits all properties from type `Alertable`
+      Head: Manager # inherits all properties from type `Manager`
+  Person:
+    type: object
+    properties:
+      firstname: string
+      lastname: string
+      title?: string
+    example:
+      firstname: Pawel
+      lastname: Psztyc
+      title: Mr
+  Phone:
+    type: string
+    pattern: "^[0-9|-]+$" # defines pattern for the content of type `Phone`
+  Manager:
+    type: Person # inherits all properties from type `Person`
+    properties:
+      reports: Person[] # inherits all properties from type `Person`; array type where `[]` is a shortcut
+      phone:  Phone
+  Admin:
+    type: Person # inherits all properties from type `Person`
+    properties:
+      clearanceLevel:
+        enum: [ low, high ]
+  AlertableAdmin:
+    type: Admin # inherits all properties from type `Admin`
+    properties:
+      phone: Phone # inherits all properties from type `Phone`; uses shortcut syntax
+  Alertable: Manager | AlertableAdmin # union type; either a `Manager` or `AlertableAdmin`
+
+securitySchemes:
+  basic:
+    description: |
+      This API supports Basic Authentication for staging environment.
+    type: Basic Authentication
+  digest:
+    description: |
+      This API supports DigestSecurityScheme Authentication for staging environment.
+    type: Digest Authentication
+  oauth2:
+    type: OAuth 2.0
+    description: Test OAuth2
+    describedBy:
+      headers:
+        Authorization:
+          example: Barer 1234
+    settings:
+      accessTokenUri: https://domain.com/access-token
+      authorizationUri: https://domain.com/auth
+      authorizationGrants:  [authorization_code, client_credentials, implicit]
+      scopes: [profile]
+  x-test1:
+    description: |
+      A custom security scheme for authenticating requests.
+    type: x-custom
+    describedBy:
+      headers:
+        SpecialToken:
+          description: |
+            Used to send a custom token.
+          type: string
+      queryParameters:
+        debugToken:
+          description: Select one of available values to run the request in the debug mode with selected level.
+          enum: [Info, Log, Warning, Error, Critical]
+          type: string
+          required: false
+        booleanToken:
+          description: Just to test boolean values.
+          type: boolean
+          default: true
+      responses:
+        401:
+          description: |
+            Bad token.
+        403:
+  x-other:
+    description: |
+      Other custom security method for authorization.
+    type: x-custom
+    describedBy:
+      queryParameters:
+        apiUserId:
+          description: |
+            Your api user ID. Some imaginary value.
+          type: number
+          required: true
+        apiNonce:
+          description: Random string
+          type: string
+      responses:
+        401:
+          description: |
+            Bad token autorization.
+          body:
+            application/json:
+              type: object
+              properties:
+                error:
+                  type: boolean
+                  description: Always true. Indicates that the response is errord.
+                message:
+                  type: string
+                  description: Human readable message describing the error.
+  oauth1:
+    type: OAuth 1.0
+    settings:
+      authorizationUri: https://echo.advancedrestclient.com/auth/oauth1/access_token
+      requestTokenUri: https://echo.advancedrestclient.com/auth/oauth1/dialog/authorize
+      tokenCredentialsUri: https://echo.advancedrestclient.com/auth/oauth1/request_token
+      signatures: [HMAC-SHA1, PLAINTEXT]
+    describedBy:
+      headers:
+        Authorization:
+          type: string
+/people:
+  displayName: People endpoint
+  get:
+    displayName: List people
+    responses:
+      200:
+        body:
+          application/json:
+            type: Person[]
+  post:
+    securedBy: [basic, digest, oauth1, x-other, x-test1, oauth2]
+    body:
+      application/json:
+        type: object
+        properties:
+          id: number
+          name: string
+  put:
+    body:
+      application/json:
+        type: Person
+/{orgId}:
+  securedBy: basic
+  put:
+    body:
+      application/json:
+        type: Org
+  get:
+    queryParameters:
+      test:
+        type: string
+        default: test
+        example: test
+      optional:
+        type: string
+        required: false
+        example: optional-test
+    responses:
+      200:
+        body:
+          application/json:
+            type: Org # reference to global type definition
+            example:
+              onCall:
+                firstname: nico
+                lastname: ark
+                clearanceLevel: low
+                phone: "12321"
+              Head:
+                firstname: nico
+                lastname: ark
+                reports:
+                  -
+                    firstname: nico
+                    lastname: ark
+                phone: "123-23"

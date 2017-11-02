@@ -1,0 +1,46 @@
+#%RAML 1.0
+title: Ultimate Open Weather
+
+version: v3
+baseUri: http://api.openweathermap.org/data/2.5/
+
+traits:
+   isSearchableByCity: !include /exchange_modules/com.sunday/issearchable/1.0.1/issearchable.raml
+   isMetric: !include /exchange_modules/com.sunday/ismetric/1.0.0/ismetric.raml
+   isAPIKey: !include /exchange_modules/com.sunday/isapikey/1.0.0/isapikey.raml
+   client-id-required:
+    queryParameters:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+
+/weather:
+   displayName: Weather
+   is: [isSearchableByCity,isMetric,isAPIKey,client-id-required]
+   get:
+     description: |
+      Search weather by city name      
+     responses:
+      200:
+       body:
+        application/json: 
+         example: !include Examples/weatherExample.json
+        
+/forecast:
+  displayName: Forecast
+  is: [isSearchableByCity,isMetric,isAPIKey,client-id-required]
+  get:
+    description: |
+      seach weather forecast for 5 days with data every 3 hours by city name. 
+    responses:
+     200:
+      body:
+        application/json: 
+         example: !include Examples/forecastExample.json  
+        
+/station:
+  displayName: Station
+  description: |
+    Get the most recent measurements from weather station.
+   
