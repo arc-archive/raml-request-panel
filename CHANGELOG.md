@@ -1,3 +1,14 @@
+<a name="0.5.3"></a>
+## [0.5.3](https://github.com/advanced-rest-client/raml-request-panel/compare/0.5.2...0.5.3) (2017-12-14)
+
+
+### Update
+
+* Moved enhancer to dev dependencies ([bb77d6c70292b96eb078be40cc41967eaa737c8e](https://github.com/advanced-rest-client/raml-request-panel/commit/bb77d6c70292b96eb078be40cc41967eaa737c8e))
+* Updated tests configuration. ([19c0e24520873324f3ed92bf977bba231009404b](https://github.com/advanced-rest-client/raml-request-panel/commit/19c0e24520873324f3ed92bf977bba231009404b))
+
+
+
 <a name="0.5.2"></a>
 ## [0.5.2](https://github.com/advanced-rest-client/raml-request-panel/compare/0.5.1...0.5.2) (2017-11-02)
 
