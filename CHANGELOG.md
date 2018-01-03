@@ -1,3 +1,13 @@
+<a name="0.5.5"></a>
+## [0.5.5](https://github.com/advanced-rest-client/raml-request-panel/compare/0.5.4...0.5.5) (2018-01-03)
+
+
+### Fix
+
+* Fixed setting of `isXhr` flag. ([6170cff574f0132821fd4ef105160c01e5190611](https://github.com/advanced-rest-client/raml-request-panel/commit/6170cff574f0132821fd4ef105160c01e5190611))
+
+
+
 <a name="0.5.4"></a>
 ## [0.5.4](https://github.com/advanced-rest-client/raml-request-panel/compare/0.5.3...0.5.4) (2017-12-14)
 
