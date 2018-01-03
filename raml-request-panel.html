@@ -744,7 +744,8 @@ This property will be propagated to all sub-elements that uses this property to 
 
     // A handler for the `api-console-response` event.
     _responseHandler: function(e) {
-      this._setResponseIsXhr(e.detail.isXhr || true);
+      var isXhr = typeof e.detail.isXhr === 'boolean' ? e.detail.isXhr : true;
+      this._setResponseIsXhr(isXhr);
       this._setResponse(e.detail.response);
       this._setResponseError(e.detail.error);
       this._setRequest(e.detail.request);
