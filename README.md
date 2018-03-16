@@ -1,6 +1,13 @@
-[![Build Status](https://travis-ci.org/advanced-rest-client/raml-request-panel.svg?branch=stage)](https://travis-ci.org/advanced-rest-client/raml-request-panel)  
+[![Build Status](https://travis-ci.org/advanced-rest-client/raml-request-panel.svg?branch=stage)](https://travis-ci.org/advanced-rest-client/raml-request-panel)
 
-# raml-request-panel
+## undefined component
+Tag: `<raml-request-panel>`
+
+### Installation
+Using bower:
+```
+bower install --save advanced-rest-client/raml-request-panel
+```
 
 The request panel view for the request defined as a RAML method.
 It is a main view element for the API console to display the request panel related to the RAML
@@ -173,27 +180,217 @@ Custom property | Description | Default
 You can set the `narrow` property so the element will be rendered in the mobile view.
 This property will be propagated to all sub-elements that uses this property to change layout.
 
+## API
+### Component properties (attributes)
+
+#### method
+- Type: `Object`
+A RAML node representing a method node in RAML definition.
+It should be obtained from the `raml-path-to-object` element.
+
+#### selectedTab
+- Type: `number`
+- Default: `0`
+Selected request tab.
+
+#### contentType
+- Type: `string`
+Current content type.
+
+#### isPayloadRequest
+- Type: `boolean`
+- Default: `false`
+- Read only property
+Computed value if the method can carry a payload
+
+#### headers
+- Type: `string`
+Headers for the request.
+
+#### payload
+- Type: `string`
+Body for the request
+
+#### url
+- Type: `string`
+Current URL
+
+#### narrow
+- Type: `boolean`
+If set it will renders the view in the narrow layout.
+
+#### narrowWidth
+- Type: `string`
+- Default: `"768px"`
+A widith below which the `narrow` property will be set to true.
+
+#### loadingRequest
+- Type: `boolean`
+- Default: `false`
+- Read only property
+If true then the request is currently loaded.
+
+#### responseIsXhr
+- Type: `boolean`
+- Read only property
+If true then the request was made using the XHR object (it has less data in the response).
+
+#### request
+- Type: `Request`
+- Read only property
+The request object created by the transport.
+It should be the `Request` object as defined in the Fetch API spec.
+This element provides the polyfill for this API.
+
+#### response
+- Type: `Response`
+- Read only property
+The response object from the transport.
+It should be the `Response` object as defined in the Fetch API spec.
+This element provides the polyfill for this API.
+
+#### responseError
+- Type: `Object`
+- Read only property
+Set when the response errored.
+
+#### loadingTime
+- Type: `number`
+- Read only property
+Response full loading time.
+
+#### timings
+- Type: `Object`
+- Read only property
+If the transport method is able to collect detailed information about request timings
+then this value will be set. It's the `timings` property from the HAR 1.2 spec.
+
+#### redirectTimings
+- Type: `Array`
+- Read only property
+If the transport method is able to collect detailed information about redirects timings
+then this value will be set. It's a list of `timings` property from the HAR 1.2 spec.
+
+#### redirects
+- Type: `Array`
+- Read only property
+It will be set if the transport method can generate information about redirections.
+
+#### sourceMessage
+- Type: `string`
+- Read only property
+Http message sent to the server.
+
+This information should be available only in case of advanced HTTP transport.
+
+#### authRequired
+- Type: `boolean`
+Received from the authorization panel state if authorization is required
+
+#### authValid
+- Type: `boolean`
+Received from the authorization panel state if authorization data is valid
+
+#### redirectUrl
+- Type: `string`
+OAuth2 redirect URL
+
+#### authMethod
+- Type: `string`
+Selected by the user auth method (if any)
+
+#### authSettings
+- Type: `Object`
+Current authorization settings.
+
+#### urlInvalid
+- Type: `boolean`
+Computed value when the URL change.
+If not valid form submission won't be possible.
+
+#### noUrlEditor
+- Type: `boolean`
+Hides the URL editor from the view.
+The editor is still in the DOM and the `urlInvalid` property still will be set.
+
+#### baseUri
+- Type: `string`
+A base URI for the API. To be set if RAML spec is missing `baseUri`
+declaration and this produces invalid URL input. This information
+is passed to the URL editor that prefixes the URL with `baseUri` value
+if passed URL is a relative URL.
+
+#### queryModel
+- Type: `Object`
+Computed model for query parameters
+
+#### uriModel
+- Type: `Object`
+Computed model for URI parameters
+
+#### hasUriParameters
+- Type: `boolean`
+Computed value from the parameters model
+
+#### hasQueryParameters
+- Type: `boolean`
+Computed value from the parameters model
+
+#### hasParameters
+- Type: `boolean`
+Computed value from the parameters model
+
+#### noAuth
+- Type: `boolean`
+- Default: `true`
+- Read only property
+Value computed when RAML method change.
+It is set to true when authorization is not defined for current
+endpoint's method.
 
 
-### Events
-| Name | Description | Params |
-| --- | --- | --- |
-| api-console-request | Event fired when the console want to make a request to an endpoint. If the hosting application can handle the event and will make a request on behalf of the console, this event must be cancelled. Otherwise internal XHR request will be made. | method **String** - The HTTP method name |
-url **String** - Endpoint's URL |
-headers **String** - A HTTP headers string (as defined in the spec) |
-payload **String** - A message body (encoded if necessary). |
-auth **Object** - Collected authorization data. In most cases it is unused. It is required for OAuth1 to pass this data to handle request signing by the `oauth-authorization` element. |
-| api-console-response-ready | Fired when the response has been recorded and request, response, redirects and timings data are set. | isXhr **Boolean** - True if the transport method is a basic transport. |
-response **Response** - The response object |
-responseError **Error** - Error object if the response is errored |
-request **Request** - The request object. |
-loadingTime **Number** - Request loading time |
-timings **Object** - As defined in HAR 1.2 timnings object |
-redirectTimings **Array.<Object>** - List of redirect timings |
-redirects **Array** - List of redirect Responses |
-sourceMessage **String** - Source HTTP message sent to the server. |
-# raml-request-panel-simple-xhr
+### Component methods
 
+#### execute
+- Return type: `undefined`
+Execute the request with current settings.
+This method fires the `api-console-request` so the request can be handled by the
+hosting app.
+Hosting app must call `event.preventDefault()` on the event otherwise the console
+will attempt to make a request usnig XHR object.
+#### authAndExecute
+- Return type: `undefined`
+Performs an authorization by bringing up the authorization
+form in a popup and after successful authorization executes the
+request.
+#### serializeRequest
+- Return type: `undefined`
+Returns an object with the request properties.
+The object contains:
+- method (String)
+- url (String)
+- headers (String)
+- payload (String)
+- auth (Object)
+
+The `auth` property is optional and is only added to the request if simple `authorization`
+header will not work. For example NTLM auth method has to be made on a single socket
+connection (authorization and the request) so it can't be made before the request.
+
+The `auth` object contains 2 properties:
+- type (String) the authorization type - one of from the `auth-methods` element
+- settings (Object) Authorization parameters entered by the user. It vary and depends on
+selected auth method. For example in case of the NTLM it will be: `username`, `password` and
+`domain`.
+
+## undefined component
+Tag: `<raml-request-panel-simple-xhr>`
+
+### Installation
+Using bower:
+```
+bower install --save advanced-rest-client/raml-request-panel-simple-xhr
+```
 
 The `raml-request-panel-simple-xhr` is an element that executes the request if the hosted app do
 not handle the `api-console-request` event.
@@ -250,4 +447,36 @@ in the hosted app. Add the `fetch-polyfill` element (advanced-rest-client/fetch-
 hosted app to have it supported.
 
 Because this element fires back an event it has to be attached to the DOM.
+
+## API
+### Component properties (attributes)
+
+#### loading
+- Type: `boolean`
+- Default: `false`
+- Read only property
+If true then the request is currently loaded.
+
+#### request
+- Type: `Object`
+Generated Request object during the latest request
+
+#### response
+- Type: `Object`
+Generated Response object during the latest request
+
+#### error
+- Type: `Object`
+Generated error object during the latest request
+
+#### loadingTime
+- Type: `number`
+Total request / response time
+
+
+### Component methods
+
+#### execute
+- Return type: `undefined`
+Executes the request.
 
