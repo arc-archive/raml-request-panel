@@ -1,3 +1,13 @@
+<a name="0.5.7"></a>
+## [0.5.7](https://github.com/advanced-rest-client/raml-request-panel/compare/0.5.5...0.5.7) (2018-03-16)
+
+
+### Fix
+
+* FIxed tests ([0550c1226dd85752a699cce2defcf2bf5ed836f8](https://github.com/advanced-rest-client/raml-request-panel/commit/0550c1226dd85752a699cce2defcf2bf5ed836f8))
+
+
+
 <a name="0.5.6"></a>
 ## [0.5.6](https://github.com/advanced-rest-client/raml-request-panel/compare/0.5.5...0.5.6) (2018-01-03)
 
