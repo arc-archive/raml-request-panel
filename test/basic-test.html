@@ -184,8 +184,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       test('Should serialize request', function() {
         var result = element.serializeRequest();
         assert.equal(result.method, 'POST', 'Method is set');
-        assert.equal(result.url, 'http://raml-test.domain.com/people?booleanToken=true',
+        assert.equal(result.url, 'http://raml-test.domain.com/people?apiUserId=&apiNonce=&booleanToken=true',
         'URL is set');
+
         assert.equal(result.headers,
           'Authorization: , Barer 1234\nSpecialToken: \nContent-Type: application/json',
           'Headers are set');
