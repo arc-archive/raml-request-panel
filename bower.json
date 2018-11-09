@@ -63,7 +63,7 @@
     "paper-dropdown-menu": "polymerelements/paper-dropdown-menu#^1.4.3",
     "raml-js-parser": "advanced-rest-client/raml-js-parser#^2.0.0",
     "api-console-ext-comm": "advanced-rest-client/api-console-ext-comm#^0.1.1",
-    "raml-json-enhance": "advanced-rest-client/raml-json-enhance#^0.3.2"
+    "raml-json-enhance": "advanced-rest-client/raml-json-enhance#^0.4.0"
   },
   "ignore": [
     "**/.*",
