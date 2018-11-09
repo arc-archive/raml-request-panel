@@ -161,8 +161,8 @@ Because this element fires back an event it has to be attached to the DOM.
         var headers = new Headers();
         var list = data.headers.split('\n').map(function(line) {
           var _parts = line.split(':');
-          var _name = _parts[0];
-          var _value = _parts[1];
+          var _name = _parts.shift();
+          var _value = _parts.join(':');
           _name = _name ? _name.trim() : null;
           _value = _value ? _value.trim() : null;
           if (!_name || !_value) {
